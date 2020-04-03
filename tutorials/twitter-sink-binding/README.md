@@ -14,18 +14,18 @@ For the purposes of this, we will create a container that pulls tweets from Twit
 
 Since we will be using Twitter, let’s first get a Twitter API Key and Secret. You will need a Twitter account. If you don’t have one, they are free, and you can follow me at @thejaysmith if you like. Let’s go to [Twitter’s Developer Page](https://developer.twitter.com/en/apps) and create an app.
 
-![create an app](https://raw.githubusercontent.com/TheJaySmith/knative-howto/master/images/create-an-app.png)
+![create an app](https://raw.githubusercontent.com/TheJaySmith/serverless-eventing/master/assets/images/create-an-app.png)
 
 You will be required to fill out “App name” and “Application description”. What you type here is arbitrary but I would recommend naming the application something simple like “Knative Test” (which can also work for Application description).
 
 For the purposes of this demo, you can use your personal website or the GitHub repo URL for “Website URL” and write your best explanation as to what Knative is in the “Tell us how this app will be used” field. You will then agree to the Developer Agreement.
 On the following page, let’s go to “Keys and tokens”
 
-![twitter auth](https://raw.githubusercontent.com/TheJaySmith/knative-howto/master/images/twitter-auth.png)
+![twitter auth](https://raw.githubusercontent.com/TheJaySmith/serverless-eventing/master/assets/images/twitter-auth.png)
 
 You will copy the “API Key” and the “API Secret” and store it somewhere safe. From there, go ahead and click the “Generate” button to get an “Access token” and “Access token secret”
 
-![generate token](https://raw.githubusercontent.com/TheJaySmith/knative-howto/master/images/generate-token.png)
+![generate token](https://raw.githubusercontent.com/TheJaySmith/serverless-eventing/master/assets/images/generate-token.png)
 
 You will see a pop-up containing the “Access token” and “Access token secret”. Please copy those as we will be using them later.
 
@@ -62,7 +62,7 @@ Google Cloud recently GA’d [Cloud Secret Manager](https://cloud.google.com/sec
 
 We will go from the Hamburger -> Security -> Secrets.
 
-![secret manager](https://raw.githubusercontent.com/TheJaySmith/knative-howto/master/images/secret-manager.png)
+![secret manager](https://raw.githubusercontent.com/TheJaySmith/serverless-eventing/master/assets/images/secret-manager.png)
 
 Let’s now Create a secret . We will create four so we will put a name for your key in “Name” and the secret in “Secret Value”. For the sake of this demo, be sure to use the below names and give them the corresponding “Secret Value” that you collected in the Twitter section.
 
@@ -82,7 +82,7 @@ We will now build our containers.
 First, let’s take a look at our code.
 
 ```bash
-cd eventing/event-viewer/
+cd source/event-viewer/
 ```
 
 You will see these files
@@ -140,7 +140,7 @@ We have built the container and pushed it to our local registry. Now let’s mov
 Let’s navigate to our `twitter-sink-binding` directory
 
 ```bash
-cd ../twitter/twitter-sink-binding/
+cd ../tutorials/twitter-sink-binding/
 ```
 
 Before we get started, let’s run these commands in order to include your `$PROJECT_ID` in the container path.
@@ -363,9 +363,17 @@ $ kubectl logs twitter-event-viewer-rqj4f-deployment-5886bd7f6-5pwvv -c user-con
 [2020-04-01 23:22:09 +0000] [1] [INFO] Using worker: threads
 [2020-04-01 23:22:09 +0000] [8] [INFO] Booting worker with pid: 8
 [2020-04-01 23:22:09 +0000] [8] [INFO] Event Display starting
-[2020-04-01 23:22:11 +0000] [8] [INFO] Event Display received event: ["{\"msg\": <YOUR TWEETS>...
+[2020-04-01 23:22:11 +0000] [8] [INFO] Event Display received event: ["{\"msg\": <YOUR TWEETS ... >
 ```
 
 ## What Happened
 
 Our `twitter-producer` application acts an event producer that runs on a 30 second loop and checks Twitter for tweet matching the search criteria that you set. It will then send those events to our sink `event-viewer` application. In order to view what’s being sent, we just need to read the container logs. You will see a series of tweets come in. If you ran this every 30 seconds, you should see another set of tweets.
+
+## Clean Up
+
+Now that everything is done, let's go ahead and delete the cluster.
+
+```bash
+gcloud container clusters delete $CLUSTER_NAME
+```

@@ -6,7 +6,7 @@ spec:
   subject:
     apiVersion: serving.knative.dev/v1
     kind: Service
-    name: twitter
+    name: twitter-producer
   sink:
     ref:
       apiVersion: serving.knative.dev/v1
