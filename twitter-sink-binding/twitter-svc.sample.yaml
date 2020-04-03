@@ -1,0 +1,10 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: twitter
+spec:
+  template:
+    spec:
+      containers:
+      - image: gcr.io/PROJECT_ID/twitter-producer:v1
+        imagePullPolicy: Always

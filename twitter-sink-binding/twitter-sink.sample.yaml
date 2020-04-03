@@ -1,0 +1,10 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: twitter-event-viewer
+spec:
+  template:
+    spec:
+      containers:
+      - image: gcr.io/PROJECT_ID/event-viewer:v1
+        imagePullPolicy: Always

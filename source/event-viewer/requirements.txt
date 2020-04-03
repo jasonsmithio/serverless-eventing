@@ -1,0 +1,5 @@
+kncloudevents==0.1.0
+pylint==2.4.0
+gunicorn==19.9.0
+cloudevents==0.2.3
+Flask==1.1.1

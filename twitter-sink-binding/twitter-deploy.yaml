@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: twitter
+  labels:
+    app: twitter
+spec:
+  selector:
+    matchLabels:
+      app: twitter
+  template:
+    metadata:
+      labels:
+        app: twitter
+    spec:
+      containers:
+        - image: gcr.io/rikudog/twitter-sink:v3
+          name: twitter
