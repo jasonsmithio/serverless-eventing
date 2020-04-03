@@ -140,7 +140,7 @@ We have built the container and pushed it to our local registry. Now let’s mov
 Let’s navigate to our `twitter-sink-binding` directory
 
 ```bash
-cd ../tutorials/twitter-sink-binding/
+cd ../../tutorials/twitter-sink-binding/
 ```
 
 Before we get started, let’s run these commands in order to include your `$PROJECT_ID` in the container path.
