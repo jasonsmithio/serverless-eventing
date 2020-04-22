@@ -1,0 +1,87 @@
+confluentPlatformImage: &cpImage
+  image: 
+    tag: 5.4.1.0
+ 
+global:
+  initContainer:
+    <<: *cpImage
+  provider:
+    registry:
+      fqdn: docker.io 
+    name: gcp 
+    storage:
+      provisioner: kubernetes.io/gce-pd 
+      reclaimPolicy: Delete 
+      parameters:
+        type: pd-ssd 
+
+manager:
+  name: manager
+
+#operator:
+#  name: operator
+#  image:
+#    tag: 0.176.1
+
+zookeeper:
+  <<: *cpImage
+  disableHostPort: true
+  resources:
+    cpu: 200m
+    memory: 512Mi
+  
+kafka:
+  <<: *cpImage
+  disableHostPort: true
+  resources:
+    cpu: 200m
+    memory: 1Gi
+  loadBalancer:
+    enabled: false
+  tls:
+    enabled: false
+  metricReporter:
+    enabled: true
+  configOverrides:
+    server:
+    - auto.create.topics.enable=true
+
+schemaregistry:
+  <<: *cpImage
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071 
+
+connect:
+  image:
+    repository: cnfldemos/cp-server-connect-operator-datagen 
+    tag: 0.3.1-5.4.1.0
+  tls:
+    enabled: false
+  loadBalancer:
+    enabled: false
+  dependencies:
+    kafka:
+      brokerCount: 1
+      bootstrapEndpoint: kafka:9071
+    schemaregistry:
+      enabled: true 
+      url: http://schemaregistry:8081 
+
+controlcenter:
+  <<: *cpImage
+  loadBalancer:
+    enabled: false
+  dependencies:
+    c3KafkaCluster:
+      zookeeper:
+        endpoint: zookeeper:2181
+      bootstrapEndpoint: kafka:9071
+      brokerCount: 1
+    connectCluster:
+      enabled: true
+      url: http://connectors:8083
+    schemaRegistry:
+      enabled: true
+      url: http://schemaregistry:8081 
+
