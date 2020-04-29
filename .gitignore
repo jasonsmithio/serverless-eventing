@@ -4,3 +4,4 @@ __pycache__
 twitter-deploy.yaml
 twitter-sink.yaml
 twitter-svc.yaml
+producer.py
