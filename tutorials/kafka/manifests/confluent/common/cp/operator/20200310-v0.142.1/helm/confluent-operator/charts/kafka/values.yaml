@@ -1,0 +1,163 @@
+## If false, kafka will not be installed
+##
+enabled: false 
+## Total replica count equals to the total node required to deploy pods
+##
+replicas: 3
+## Name of kafka cluster
+##
+name: kafka
+## Image information
+##
+image:
+  repository: confluentinc/cp-server-operator
+  tag: 5.4.1.0
+## Pod resources configuration
+##
+resources:
+  ## It is recommended to set both resource requests and limits.
+  ## If not configured, kubernetes will set cpu/memory defaults.
+  ## Reference: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  requests:
+    cpu: "1"
+    memory: 4Gi
+  limits: {}
+## Volume size
+##
+volume:
+  data0: 10Gi
+## Options for turning Kafka features on/off
+##
+options:
+  acl:
+    enabled: false
+    # value for super.users server property, takes form User:UserName;User:UserTwo;
+    supers: ""
+## JVM configuration
+##
+jvmConfig:
+ heapSize: 4G
+
+## Pod termination grace-period
+## Don't change this number as we run pre-hook that take cares of gracefully terminating the cluster
+terminationGracePeriodSeconds: 2147483647
+## Only required if Kafka cluster needs external access
+##
+loadBalancer:
+  ## If use-case for Kafka-cluster is to access from out of kubernetes cluster then configured `enabled` to true.
+  enabled: false
+  ## External will create public facing endpoints, setting this to internal will
+  ## create a private-facing ELB with VPC peering
+  type: external
+  ## Add other annotations on the ELB here
+  annotations: {}
+   
+  ##  Domain name will configure in Kafka's external listener
+  ##
+  domain: ""
+  ## If configured the bootstrap fqdn will be .bootstrapPrefix.domain ( dot's are not supported in the prefix)
+  ## If not the bootstrapPrefix will be .name.domain
+  bootstrapPrefix: ""
+  ## If not configured, the default value will be 'b' appended to the domain name as prefix ( dot's are not supoorted in the prefix)
+  ##
+  brokerPrefix: ""
+## Enable Apache Kafka to run on TLS mode. 
+##
+tls:
+  ##
+  ## If TLS is not enabled, SASL with PLAIN authentication is configured
+  ##
+  enabled: false
+  ##
+  ## TLS Authentication type
+  ##
+  authentication:
+    ## 
+    ## Enable different type of authentication, supported is tls (2-way TLS ) or plain (SASL with plain authentication)
+    ##
+    type: ""
+  fullchain: |-
+  privkey: |-
+  cacerts: |-
+##
+## Only for SASL Plain configurations
+## These users will be loaded dynamically without restarting the Kafka cluster when running helm upgrade.
+## Uses format as username=password e.g confluent=password
+sasl:
+  plain: []
+##
+## Configure Confluent Metric Reporter
+##
+metricReporter:
+  enabled: true
+  ## Period (millisecond) the report should use to publish messages to bootstrapEndpoint
+  ##
+  publishMs: 30000
+  ## ReplicationFactor, if empty, the value is based on the replicas count
+  ##
+  replicationFactor: ""
+  tls:
+    enabled: false
+    ## If true, inter-communication will be encrypted if TLS is enabled. The bootstrapEndpoint will have FQDN name.
+    ## If false, the security setting is configured to use either SASL_PLAINTEXT or PLAINTEXT
+    internal: false
+    authentication:
+      type: ""
+  ## If above tls.internal is true, configure with Kafka bootstrap DNS configuration on port 9092 e.g <kafka.name>.<domain>:9092
+  ## If above tls.internal is false, configure with Kafka service name on port 9071 eg. <kafka.name>:9071 or FQDN name of Kafka service name e.g <name>.<namespace>.svc.cluster.local:9071
+  bootstrapEndpoint: ""
+##
+## Configuration override supports configuration updates for server/jvm parameters.
+## Only cluster-wide configuration are supported and some of the configuration are blacklisted which cannot be override.
+## In most of the use-case, this feature is not required.
+## Use key=value format
+## More information can be found at the official document.
+##
+configOverrides:
+  server: []
+  jvm: []
+
+##
+## Inject pod-level annotations
+## The value must be type string, please use quotes for boolean/numbers
+## Any changes on this field will trigger rolling restart
+##
+alphaPodAnnotations: {}
+#alphaPodAnnotations:
+#  string: "value"
+#  number: "1"
+#  boolean: "true"
+#  list: "[{\"labels\": {\"key\": \"value\"}},{\"key1\": \"value1\"}]"
+
+## Pod distribution on nodes with given key and values
+## The node Affinity configuration uses preferredDuringSchedulingIgnoredDuringExecution
+## https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+nodeAffinity : {}
+#nodeAffinity:
+#  key: components
+#  values:
+#  - kafka
+#  - app
+
+## Pod Anti-Affinity 
+## It uses preferredDuringSchedulingIgnoredDuringExecution 
+## https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#interlude-built-in-node-labels
+## Use this capability, if the cluster has somekind of concept of racks
+rack: {}
+#rack:
+# topology: failure-domain.beta.kubernetes.io/zone
+
+## Disable HostPort
+## This is a mechanism to isolate pod of same type running on the same node through port mapping on the host.
+## If this feature is true, make sure to use nodeAffinity and rack to distribute pod across nodes.
+## Take precaution before enabling it for the Kafka cluster
+disableHostPort: false
+##
+## Configure, if the Kafka requires to connect to specific zookeeper cluster running on different namespace or cluster.
+## If not configured, Kafka cluster will do a self-discovery of zookeeper cluster in the same namespace.
+## Example zookeeper:2181 zookeeper.<namespace>.svc.cluster.local:2181. The operator will add suffix
+## as <kafka.name>/<namespace> as part of automation.
+##
+## In most scenario, this setting is not required.
+#zookeeper:
+#  endpoint: zookeeper:2181

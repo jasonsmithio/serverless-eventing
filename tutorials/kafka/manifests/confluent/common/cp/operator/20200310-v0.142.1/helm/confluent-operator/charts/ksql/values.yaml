@@ -1,0 +1,141 @@
+## If false, ksql will not be installed
+##
+enabled: false
+## Name of ksql
+##
+name: ksql
+## Replica count
+##
+replicas: 2
+## Image information
+##
+image:
+  repository: confluentinc/cp-ksql-server-operator
+  tag: 5.4.1.0
+## Pod termination grace-period
+##
+terminationGracePeriodSeconds: 60
+## Pod resources configuration
+##
+resources:
+  ## It is recommended to set both resource requests and limits.
+  ## If not configured, kubernetes will set cpu/memory defaults.
+  ## Reference: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  requests:
+    cpu: 200m
+    memory: 4Gi
+  limits: {}
+## JVM configuration  
+jvmConfig:
+  heapSize: 4G
+
+volume:
+  data: 1Gi
+
+## Endpoint Security Configuration
+tls:
+ enabled: false
+ port: 443
+ authentication:
+  type: ""
+ cacerts: |-
+ fullchain: |-
+ privkey: |-
+
+## External Access
+##
+loadBalancer:
+  ## Create a LoadBalancer for external networking
+  enabled: false
+  ## External will create public facing endpoints, setting this to internal will
+  ## create a private-facing ELB with VPC peering
+  type: external
+  ## Add other annotations here that you want on the ELB
+  annotations: {}
+  ## If external access is enable, the fqdn must be provided to access ksql
+  ##
+  domain: ""
+  ## If prefix is configured, external DNS name is configured as <prefix>.<domain>
+  ## otherwise external DNS name is configured as <name>.<domain> where name is cluster-name.
+  prefix: ""
+
+## Kafka dependencies
+## 
+dependencies:
+  kafka:
+    ## Total broker count
+    ##
+    brokerCount: 3
+    tls: 
+      ## Enable TLS
+      ##
+      enabled: false
+      authentication:
+        type: ""
+      ## If true, inter-communication will be encrypted if TLS is enabled. The bootstrapEndpoint will have FQDN name.
+      ## If false, the security setting is configured to use either SASL_PLAINTEXT or PLAINTEXT
+      internal: false
+    ## If tls.enabled and tls.internal is true then use Kafka bootstrap DNS configuration otherwise use kubernetes service name or kubernetes service
+    ## name depends if kafka cluster is running on the same namespace or different namespace
+    bootstrapEndpoint: ""
+    ## ksql requires communication with individual broker endpoints, add them here
+    ## eg. "kafka-0.kafka.operator.svc.cluster.local:9071,kafka-1.kafka.operator.svc.cluster.local:9071,kafka-2.kafka.operator.svc.cluster.local:9071"
+    brokerEndpoints: ""
+  ## Interceptor configuration
+  ## If bootstrapEndpoint is not configured, the security is configured based on the kafka dependencies configuration.
+  ## Configure if different bootstrapEndpoint/security is required for interceptor
+  interceptor:
+    ## Enable Interceptor
+    enabled: false
+    ## Period the interceptor should use to publish messages in millisecond
+    ##
+    publishMs: 15000
+    tls:
+      enabled: false
+      internal: false
+      authentication:
+        type: ""
+    bootstrapEndpoint: ""
+  schemaRegistry:
+    enabled: false
+    ## example: http://schemaregistry:8081
+    url: ""
+    tls:
+      enabled: false
+      authentication:
+        type: ""
+
+
+## Pod distribution on nodes with given key and values
+## The node Affinity configuration uses preferredDuringSchedulingIgnoredDuringExecution
+## https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+nodeAffinity : {}
+#nodeAffinity:
+#  key: components
+#  values:
+#  - ksql
+#  - app
+
+## Pod Anti-Affinity
+## It uses preferredDuringSchedulingIgnoredDuringExecution
+## https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#interlude-built-in-node-labels
+## Use this capability, if the cluster has somekind of concept of racks
+rack: {}
+#rack:
+# topology: kubernetes.io/hostname
+
+## Disable HostPort
+## This is mechanism to isolate pods of same type running on the same node through port mapping on the host.
+## If this feature is true, make sure to use nodeAffinity and rack to distribute pod across nodes.
+## Take precaution before enabling it for the Kafka cluster
+disableHostPort: true
+##
+## Inject pod-level annotations
+## Any changes on this field will trigger rolling restart
+##
+alphaPodAnnotations: {}
+#alphaPodAnnotations:
+#  string: "value"
+#  number: "1"
+#  boolean: "true"
+#  list: "[{\"labels\": {\"key\": \"value\"}},{\"key1\": \"value1\"}]"

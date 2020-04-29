@@ -1,0 +1,115 @@
+# Default values for confluent-operator.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+serviceAccounts:
+   ## Confluent Operator requires cluster-level admin access
+   ##
+   operator:
+      name: cc-operator
+
+global:
+  provider:
+    ## Support values: aws | gcp | azure | private
+    ##
+    name: ""
+    ## Name of region
+    ##
+    region: ""
+    kubernetes:
+      ## Configure if k8s internal domain name is different than svc.cluster.local
+      ##  
+      clusterDomain: ""
+      deployment:
+        ## If kubernetes is deployed in multi zone mode then specify availability-zones as appropriate
+        ## If kubernetes is deployed in single availability zone then specify appropriate values
+        ## For the private cloud, use kubernetes node labels as appropriate
+        zones: []
+    storage:
+      ## https://kubernetes.io/docs/concepts/storage/storage-classes/
+      ##
+      provisioner: ""
+      ## Parameters for storage-class. Please go through
+      ## https://kubernetes.io/docs/concepts/storage/storage-classes/ to fill parameters
+      ## For multi zone deployment, use zones otherwise use zone parameter as appropriate
+      parameters: {}
+      reclaimPolicy: Delete
+      mountOptions: []
+      volumeBindingMode: ""
+      allowedTopologies: []
+      ## Add annotations in storage-class resources
+      ##
+      annotations:
+        storageclass.beta.kubernetes.io/is-default-class: "false"
+    registry:
+      ## Docker registry endpoint where Confluent Images are available.
+      ##
+      fqdn:
+      credential:
+        ## Enable if authentication is required to pull images in kubernetes cluster.
+        ##
+        required: false
+        ## Docker login username
+        ##
+        username: ""
+        ## Docker login password
+        ##
+        password: ""
+  ## All containers to run as non root with specific UID/GUID
+  ## For OpenShift enable randomUID to true. If randomUID is false, then you must use right UID/GUID and configure confluent-scc.yaml accordingly.
+  ## The scripts can be found at scripts/openshift/confluent-scc.yaml
+  ## https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podsecuritycontext-v1-core
+  pod:
+    securityContext:
+      fsGroup: 1001
+      runAsUser: 1001
+      runAsGroup: ""
+      runAsNonRoot: true
+      supplementalGroups: []
+      seLinuxOptions: {}
+    ## Only enable for OpenShift Platform if random UID is required to run container process.
+    ## Follow Readme.md in scripts/openshift folder for more information.
+    ## For Debian based CP images, enable will run the container process as root UID.
+    randomUID: false
+  ## 
+  ## This is configured for inter-broker-configurations username/password. 
+  ## All component and clients use these credentials to communicate with Kafka.
+  ##
+  sasl:
+    plain:
+      username: test
+      password: test123
+  ##
+  ## Init Container configurations
+  ##
+  initContainer:
+    image:
+      repository: confluentinc/cp-init-container-operator
+      tag: 5.4.1.0
+
+operator:
+  enabled: false
+
+zookeeper:
+  enabled: false
+
+kafka:
+  enabled: false
+  
+schemaregistry:
+  enabled: false
+
+controlcenter:
+  enabled: false
+
+replicator:
+  enabled: false
+
+connect:
+  enabled: false
+
+ksql:
+  enabled: false
+
+externaldns:
+  enabled: false
+  
