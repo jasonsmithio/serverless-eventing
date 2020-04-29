@@ -33,8 +33,8 @@ GitHub and Setup
 Now that we have our API keys and secrets, let’s pull down our repo.
 
 ```bash
-Git clone git@github.com:TheJaySmith/knative-howto.git
-cd knative-howto/
+git clone git@github.com:TheJaySmith/serverless-eventing.git
+cd serverless-eventing/
 ```
 
 I have created a script called `setup-cloudrun.sh` that simplifies the staging process. It will attempt to install [Google Cloud SDK](https://cloud.google.com/sdk/) if you don’t have it installed already. If it can execute `gcloud`, it skips this step. It will then do the following.
