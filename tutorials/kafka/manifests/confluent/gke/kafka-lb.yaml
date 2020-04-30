@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-es-0
+spec:
+  ports:
+  - port: 9092
+    name: kafka-port
+    protocol: TCP
+  selector:
+    pod-name: kafka-0
+  type: LoadBalancer

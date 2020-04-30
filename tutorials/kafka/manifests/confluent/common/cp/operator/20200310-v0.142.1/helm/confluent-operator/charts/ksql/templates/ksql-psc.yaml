@@ -1,0 +1,236 @@
+{{- $_ := set $ "kreplicas" .Values.dependencies.kafka.brokerCount }}
+{{- $_ := required "Namespace is required" .Release.Namespace }}
+{{- $_ := required "Name of KSQL is required." $.Values.name }}
+{{- $_ := required "Kafka Cluster bootstrap endpoint is required" $.Values.dependencies.kafka.bootstrapEndpoint }}
+{{- $_ := required "Kafka Cluster broker endpoints are required" $.Values.dependencies.kafka.brokerEndpoints }}
+{{- $_ := required "Replica count is required" $.Values.replicas }}
+{{- $_ := required "Docker Repository FQDN path is required" .Values.global.provider.registry.fqdn }}
+{{- $k8sInternalDomain := default "svc.cluster.local" $.Values.global.provider.kubernetes.clusterDomain }}
+{{- $replicas := .Values.replicas | int }}
+apiVersion: operator.confluent.cloud/v1
+kind: PhysicalStatefulCluster
+metadata:
+  {{- include "confluent-operator.labels" . }}
+  {{- include "confluent-operator.finalizers" . }}
+  {{- include "confluent-operator.component-name" . }}
+  {{- include "confluent-operator.namespace" . }}
+spec:
+  cloud:
+    {{- include "confluent-operator.docker-repo" . }}
+    {{- include "confluent-operator.hostPort" . }}
+  cluster_id: {{ include "confluent-operator.cluster-id" . }}
+  common:
+    config:
+      pod:
+      - config:
+        - name: template.jsonnet
+          {{- $_ := set $ "domainName" $k8sInternalDomain }}
+          value: {{ include "confluent-operator.template-psc" . | b64enc  }}
+        id: {{ $.Values.name }}
+      shared:
+      - name: log4j.properties
+        value: |2
+
+          log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+          log4j.appender.stdout.layout=org.apache.log4j.EnhancedPatternLayout
+          log4j.appender.stdout.layout.ConversionPattern=[%p] %d [%t] %c %M - %m%n
+          log4j.rootLogger=INFO, stdout
+      {{- if $.Values.basicAuth }}
+      - name: server_jaas.conf
+        value: |2
+
+          Ksql {
+            org.eclipse.jetty.jaas.spi.PropertyFileLoginModule required
+            file="/mnt/secrets/client_auth.conf"
+            debug="false";
+          };
+      {{- else }}
+      - name: server_jaas.conf
+        value: |2
+        #ignore
+      {{- end }}
+      - name: disk-usage-agent.properties
+        value: |
+          disk.data=/mnt/data/data
+          service.name={{ $.Values.name }}
+      - name: ksql-server.properties
+        value: |2
+          ## endpoint configuration with TLS option
+          {{- if .Values.tls.enabled }}
+          listeners=http://0.0.0.0:9088,https://0.0.0.0:8088
+          {{- if eq $.Values.tls.authentication.type "tls" }}
+          ssl.endpoint.identification.algorithm=
+          ssl.client.auth=true
+          {{- end }}
+          {{- if .Values.tls.cacerts }}
+          ssl.truststore.location=/tmp/truststore.jks
+          ssl.truststore.password=mystorepassword
+          {{- end }}
+          ssl.keystore.location=/tmp/keystore.jks
+          ssl.keystore.password=mystorepassword
+          ssl.key.password=mystorepassword
+          {{- else }}
+          listeners=http://0.0.0.0:9088,http://0.0.0.0:8088
+          {{- end }}
+          request.timeout.ms=20000
+          retry.backoff.ms=500
+
+          ## kafka client configuration
+          {{- include "ksql.kafka-configuration" . | indent 10 }}
+
+          ## ksql configuration
+          ksql.service.id={{ $.Release.Namespace }}.{{ $.Values.name }}
+          ksql.sink.replicas={{ include "confluent-operator.replication_count" $ }}
+          ksql.streams.replication.factor={{ include "confluent-operator.replication_count" $ }}
+          ksql.streams.state.dir=/mnt/data/data/ksql-state
+          ksql.streams.producer.retries=2147483647
+          ksql.streams.producer.confluent.batch.expiry.ms=9223372036854775807
+          ksql.streams.producer.request.timeout.ms=300000
+          ksql.streams.producer.max.block.ms=9223372036854775807
+          ksql.streams.num.standby.replicas=1         
+
+          {{- if $.Values.basicAuth }}
+          ## basic auth configuration
+          authentication.method=BASIC
+          authentication.roles={{ .Values.basicAuth.role }}
+          authentication.realm={{ .Values.basicAuth.realm }}
+          authentication.skip.paths=/chc/*
+          java.security.auth.login.config=/mnt/config/shared/server_jaas.conf
+          {{- end }}
+
+          {{- if $.Values.dependencies.schemaRegistry.enabled }}
+          {{- $_ := required "SchemaRegistry URL required" .Values.dependencies.schemaRegistry.url }}
+          ## schemaregistry configuration
+          ksql.schema.registry.url={{ $.Values.dependencies.schemaRegistry.url }}
+          {{- if $.Values.dependencies.schemaRegistry.tls.enabled }}
+          {{- if eq $.Values.dependencies.schemaRegistry.tls.authentication.type "tls" }}
+          ksql.schema.registry.ssl.keystore.location=/tmp/keystore.jks
+          ksql.schema.registry.ssl.keystore.password=mystorepassword
+          ksql.schema.registry.ssl.key.password=mystorepassword
+          {{- end }}
+          {{- if $.Values.tls.cacerts }}
+          ksql.schema.registry.ssl.truststore.location=/tmp/truststore.jks
+          ksql.schema.registry.ssl.truststore.password=mystorepassword
+          {{- end }}
+          {{- end }}
+          {{- end }}
+
+          {{- if .Values.dependencies.interceptor.enabled }}
+          ## interceptor config
+          {{- include "ksql.interceptor-security-config" . | indent 10 }}
+          {{- end }}
+
+          confluent.support.metrics.enable=false
+          resource.extension.classes=io.confluent.cloud.ksql.rest.health.HealthCheckResourceExtension
+      - name: admin.properties
+        value: |2
+          {{- $_ := set $ "kafkaDependency" .Values.dependencies.kafka }}
+          {{- include "confluent-operator.kafka-client-security" . | indent 10 }}
+      - name: jvm.config
+        value: |2
+
+          -Xmx {{- $.Values.jvmConfig.heapSize }}
+          -Xms {{- $.Values.jvmConfig.heapSize }}
+          -XX:+UnlockExperimentalVMOptions
+          -XX:+UseCGroupMemoryLimitForHeap
+
+          -server
+          -XX:MetaspaceSize=96m
+          -XX:+UseG1GC
+          -XX:MaxGCPauseMillis=20
+          -XX:InitiatingHeapOccupancyPercent=35
+          -XX:+ExplicitGCInvokesConcurrent
+          -XX:G1HeapRegionSize=16
+          -XX:MinMetaspaceFreeRatio=50
+          -XX:MaxMetaspaceFreeRatio=80
+          -Djava.awt.headless=true
+
+          -XX:ParallelGCThreads=1
+          -XX:ConcGCThreads=1
+
+          -Dcom.sun.management.jmxremote=true
+          -Dcom.sun.management.jmxremote.authenticate=false
+          -Dcom.sun.management.jmxremote.ssl=false
+          -Dcom.sun.management.jmxremote.local.only=false
+          -Dcom.sun.management.jmxremote.rmi.port=7203
+          -Dcom.sun.management.jmxremote.port=7203
+
+          -XX:+PrintFlagsFinal
+          -XX:+UnlockDiagnosticVMOptions
+    pod_annotations:
+    {{- include "confluent-operator.annotations" . | indent 6 }}
+    {{- include "confluent-operator.psc-init-container" . | indent 4 }}
+    container:
+      image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+      termination_grace_period_seconds: {{ $.Values.terminationGracePeriodSeconds | default 60}}
+      liveness_probe:
+        http:
+          path: /chc/live
+          port: 9088
+        initial_delay_seconds: 30
+        timeout_seconds: 10
+      readiness_probe:
+        http:
+          path: /chc/ready
+          port: 9088
+        initial_delay_seconds: 30
+        timeout_seconds: 10
+      {{- if $.Values.nodeAffinity }}
+      node_affinity:
+        key: {{ $.Values.nodeAffinity.key }}
+        values:
+{{ toYaml $.Values.nodeAffinity.values | trim | indent 8 }}
+      {{- end }}
+      {{- if $.Values.rack }}
+      rack:
+        topology: {{ $.Values.rack.topology }}
+      {{- end }}
+{{- if .Values.global.pod }}
+{{ include "confluent-operator.psc-pod-security-config" . | trim | indent 4 }}
+{{- end }}        
+    network:
+      ports:
+      - name: external
+        port: 8088
+        protocol: TCP
+      - name: internal
+        port: 9088
+        protocol: TCP
+      - name: jmx
+        port: 7203
+        protocol: TCP
+      - name: jolokia
+        port: 7777
+        protocol: TCP
+      {{- if and $.Values.loadBalancer.enabled (ne $.Values.loadBalancer.type "route") }}
+      {{- $_ := required "Configure domain name to access ksql outside kubernetes cluster." .Values.loadBalancer.domain }}
+      proxy:
+        {{- if eq .Values.loadBalancer.type "internal" }}
+        internal: true
+        {{- end }}
+        {{- if .Values.loadBalancer.annotations }}
+        annotations:
+{{ toYaml .Values.loadBalancer.annotations | trim | indent 10 }}
+        {{- end }}
+        bootstrap:
+          {{- include "confluent-operator.dns-name" . | indent 10 }}
+          {{- if $.Values.tls.enabled }}
+          port: {{ .Values.tls.port }}
+          {{- else }}
+          port: 80
+          {{- end }}
+      {{- end }}
+    {{- $_ := set $ "name" $.Values.name }}
+    {{- $_ := set $ "replicas" .Values.replicas }}
+    placement: {{ include "confluent-operator.pod-distribution" . }}
+    replicas: {{ .Values.replicas }}
+    resources:
+{{- include "confluent-operator.resource-requirements" . | indent 6}}
+      storage:
+      {{- range $key, $value := .Values.volume }}
+      - capacity: {{ $value }}
+        name: {{ $key }}
+        type: 1
+      {{- end }}
+    {{- include "confluent-operator.psc-version" . | indent 4 }}
+  type: {{ $.Values.name }}

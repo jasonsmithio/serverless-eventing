@@ -1,0 +1,10 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: currency-kafka
+spec:
+  template:
+    spec:
+      containers:
+      - image: gcr.io/PROJECT_ID/currency-kafka:v1
+        imagePullPolicy: Always
