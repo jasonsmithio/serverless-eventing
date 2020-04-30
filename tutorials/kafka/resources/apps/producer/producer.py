@@ -11,7 +11,11 @@ from kafka import KafkaProducer
 
 app = Flask(__name__)
 
+<<<<<<< HEAD
 producer = KafkaProducer(bootstrap_servers=['35.239.73.43.xip.io:9092'],
+=======
+producer = KafkaProducer(bootstrap_servers=['KAFKA_IP.xip.io:9092'],
+>>>>>>> kafka-staging
                          sasl_plain_username = 'test',
                          sasl_plain_password = 'test123',
                          security_protocol='SASL_PLAINTEXT',
@@ -30,9 +34,13 @@ def default_route():
         content = request.data.decode('utf-8')
         info(f'Event Display received event: {content}')
 
+<<<<<<< HEAD
         y = content.replace("[","").replace(" ","").split(",")
         for i in range(20):
             producer.send('money-demo', bytes(y[i], encoding='utf-8'))
+=======
+        producer.send('money-demo', bytes(y[i], encoding='utf-8'))
+>>>>>>> kafka-staging
 
         return jsonify(hello=str(content))
     else:
