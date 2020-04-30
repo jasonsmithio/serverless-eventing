@@ -1,50 +1,42 @@
 import os
 import json
+import requests
+import time
 
-from flask import Flask, jsonify, redirect, render_template, request
+from google.cloud import secretmanager
 
 from pathlib import Path  # python3 only
 
-from avdemo.avdemo import AlphaKafka
+from alpha_vantage.timeseries import TimeSeries
 
-app = Flask(__name__)
+sink_url = os.getenv('K_SINK')
 
+PROJECT_ID = os.environ.get('PROJECT_ID')
 
-CONFLUENT_HOST = os.environ.get("CONFLUENT_HOST")
-CONFLUENT_KEY = os.environ.get("CONFLUENT_KEY")
-CONFLUENT_SECRET = os.environ.get("CONFLUENT_SECRET")
-ALPHAVANTAGE_KEY = os.environ.get("ALPHAVANTAGE_KEY")
+secrets = secretmanager.SecretManagerServiceClient()
 
+ALPHAVANTAGE_KEY = secrets.access_secret_version("projects/"+PROJECT_ID+"/secrets/alpha-vantage-key/versions/1").payload.data.decode("utf-8")
 
+CURR1 = 'USD'
+CURR2 = 'JPY'
 
-origin = AlphaKafka(CONFLUENT_HOST, CONFLUENT_KEY, CONFLUENT_SECRET, ALPHAVANTAGE_KEY)
+afx = ForeignExchange(key=ALPHAVANTAGE_KEY)
 
-@app.route("/")
-def hello():
-    return "Hello World!"
-
-
-
-@app.route('/api/v1/currency', methods=['POST'])
-def get_exchange_rate():
-    if request.method == 'POST':
-        curr1 = request.args['currency1']
-        curr2 = request.args['currency2']
-        exchange = origin.curex(curr1, curr2)
-        exchangeObj = json.dumps(exchange)
-        exrate = float(exchange['5. Exchange Rate'])
-        if exrate > 105.00:
-            resp = origin.produce("cloudevents", str(
-                exchange['5. Exchange Rate']))
-            return jsonify(ping="higher", message=exrate)
-        else:
-            return jsonify(ping="lower", message=exrate)
-
-    else:
-        return "Error"
+def make_msg(message):
+    msg = '{"msg": "%s"}' % (message)
+    return msgs
 
 
+def get_currency():
+    data, _ = afx.get_currency_exchange_rate(
+            from_currency=CURR1, to_currency=CURR2)
+    exchangeObj = json.dumps(data)
+    exrate = float(exchange['5. Exchange Rate'])
+    return exrate
 
-if __name__ == "__main__":
-    app.debug=True
-    app.run()s
+
+while True:
+    headers = {'Content-Type': 'application/cloudevents+json'}
+    body = get_currency()
+    requests.post(sink_url, data=json.dumps(body), headers=headers)
+    time.sleep(30)

@@ -1,0 +1,82 @@
+## If false, zookeeper will not be installed
+##
+enabled: false 
+## Total replica count equals to the total node required to deploy pods
+##
+replicas: 3
+##
+##
+name: zookeeper
+## Image information
+##
+image:
+  repository: confluentinc/cp-zookeeper-operator
+  tag: 5.4.1.0
+## Pod resources requests and limits
+##
+resources:
+  ## It is recommended to set both resource requests and limits.
+  ## If not configured, kubernetes will set cpu/memory defaults.
+  ## Reference: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  requests:
+    cpu: 500m
+    memory: 4Gi
+  limits: {}
+
+## Volume size
+## Don't change the sequence
+volume:
+  data: 10Gi
+  txnlog: 10Gi
+## JVM configuration
+##
+jvmConfig:
+  heapSize: 4G
+## Pod termination grace-period
+##
+terminationGracePeriodSeconds: 180
+##
+## Configuration override supports configuration updates for server/jvm parameters.
+## Only cluster-wide configuration are supported and some of the configuration are blacklisted which cannot be override.
+## In most of the use-case, this feature is not required.
+##
+## More information can be found at the official document.
+##
+configOverrides:
+  server: []
+  jvm: []
+##
+## Inject pod-level annotations
+## The value must be type string, please use quotes for boolean/numbers
+## Any changes on this field will trigger rolling restart
+##
+alphaPodAnnotations: {}
+#alphaPodAnnotations:
+#  string: "value"
+#  number: "1"
+#  boolean: "true"
+#  list: "[{\"labels\": {\"key\": \"value\"}},{\"key1\": \"value1\"}]"
+
+## Pod distribution on nodes with given key and values
+## The node Affinity configuration uses preferredDuringSchedulingIgnoredDuringExecution
+## https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+nodeAffinity : {}
+#nodeAffinity:
+#  key: components
+#  values:
+#  - zookeeper
+#  - app
+
+## Pod Anti-Affinity 
+## It uses preferredDuringSchedulingIgnoredDuringExecution 
+## https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#interlude-built-in-node-labels
+## Use this capability, if kubernetes cluster has somekind of concept of racks
+rack: {}
+#rack:
+# topology: kubernetes.io/hostname
+
+## Disable HostPort
+## This is mechanism to isolate pods of same type running on the same node through port mapping on the host.
+## If this feature is true, make sure to use nodeAffinity and rack to distribute pod across nodes.
+## Take precaution before enabling it for the Zookeeper cluster
+disableHostPort: false

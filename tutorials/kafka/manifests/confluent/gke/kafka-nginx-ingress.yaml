@@ -12,7 +12,3 @@ spec:
         backend:
           serviceName: controlcenter
           servicePort: 9021
-      - path: /kafka
-        backend:
-          serviceName: kafka
-          servicePort: 9071

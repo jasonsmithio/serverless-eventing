@@ -6,6 +6,7 @@ import json
 
 from flask import Flask, jsonify, redirect, render_template, request, Response
 
+
 from kafka import KafkaProducer
 
 app = Flask(__name__)
@@ -29,15 +30,11 @@ def default_route():
         content = request.data.decode('utf-8')
         info(f'Event Display received event: {content}')
 
-        y = content.replace("[","").replace(" ","").split(",")
-        for i in range(20):
-            producer.send('money-demo', bytes(y[i], encoding='utf-8'))
+        producer.send('money-demo', bytes(y[i], encoding='utf-8'))
 
         return jsonify(hello=str(content))
     else:
         return jsonify('hello world')
-
-
 
 
 if __name__ != '__main__':

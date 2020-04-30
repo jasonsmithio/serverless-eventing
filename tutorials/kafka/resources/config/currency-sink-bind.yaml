@@ -1,14 +1,14 @@
 apiVersion: sources.knative.dev/v1alpha2
 kind: SinkBinding
 metadata:
-  name: stock-bind
+  name: currency-sink-bind
 spec:
   subject:
     apiVersion: serving.knative.dev/v1
     kind: Service
-    name: stock-controller
+    name: currency-controller
   sink:
     ref:
       apiVersion: serving.knative.dev/v1
       kind: Service
-      name: stock-producer
+      name: currency-kafka

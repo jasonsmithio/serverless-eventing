@@ -1,0 +1,97 @@
+{{- $_ := required "Namespace is required" .Release.Namespace }}
+{{- $_ := required "Name of kafka is required." $.Values.name }}
+{{- $_ := required "Kafka replica count is required" $.Values.replicas }}
+{{- $_ := required "Docker Repository FQDN path is required" .Values.global.provider.registry.fqdn }}
+
+apiVersion: cluster.confluent.com/v1alpha1
+kind: KafkaCluster
+metadata:
+  {{- include "confluent-operator.labels" . }}
+  {{- include "confluent-operator.component-name" . }}
+  {{- include "confluent-operator.namespace" . }}
+spec:
+  replicas: {{ .Values.replicas | int }}
+  image: {{ .Values.global.provider.registry.fqdn }}/{{ .Values.image.repository -}}:{{- .Values.image.tag }}
+  {{- include "confluent-operator.cr-init-container" . | indent 2 }}  
+  terminationGracePeriodInSecond: {{ .Values.terminationGracePeriodSeconds | default 2147483647 }}
+  options:
+    enterprise: true
+    {{- if .Values.options.acl.enabled }}
+    acl: true
+    {{- if and .Values.tls.enabled (ne .Values.tls.authentication.type "plain") }}
+    supers: {{ printf "User:ANONYMOUS;%s" (default "" .Values.options.acl.supers)  }}
+    {{- else }}
+    supers: {{ printf "User:%s;%s" .Values.global.sasl.plain.username (default "" .Values.options.acl.supers) }}
+    {{- end }}
+    {{- end }}
+  jvmConfig:
+    heapSize: {{ .Values.jvmConfig.heapSize }}
+  {{- if .Values.global.pod }}
+  {{- include "confluent-operator.cr-pod-security-config" . | indent 2 }}
+  {{- end }}
+  {{- if .Values.global.provider.kubernetes.clusterDomain }}
+  internalKubDomain: {{ .Values.global.provider.kubernetes.clusterDomain }}
+  {{- end }}
+  {{- include "confluent-operator.cr-annotations" .  | indent 2 }}
+  resources:
+{{- include "confluent-operator.resource-requirements" . | indent 4 }}
+    storage:
+    {{- range $key, $value := .Values.volume }}
+    - name: {{ $key }}
+      capacity: {{ $value }}
+    {{- end }}
+  {{- if or (or .Values.nodeAffinity .Values.rack) .Values.disableHostPort }}  
+  placement:
+    {{- if .Values.disableHostPort }}
+    disableHostPort: true
+    {{- end }}
+    {{- if .Values.nodeAffinity }}
+    nodeAffinity:
+      key: {{ .Values.nodeAffinity.key }}
+      values:
+{{ toYaml .Values.nodeAffinity.values | trim | indent 6 }}
+    {{- end }}
+    {{- if .Values.rack }}
+    rack:
+      topology: {{ .Values.rack.topology }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.metricReporter.enabled }}
+  {{- include "kafka.confluent-metric-reporter" .  | indent 2 }}
+  {{- end }}
+  {{- include "confluent-operator.cr-config-overrides" . | indent 2 }}
+  {{- if .Values.zookeeper }}
+  zookeeper:
+    endpoint: {{ .Values.zookeeper.endpoint }}
+  {{- end }}
+  {{- if .Values.loadBalancer.enabled }}
+  {{- $_ := required "Configure domain name (DNS) to access Kafka outside kubernetes cluster" .Values.loadBalancer.domain }}
+  network:
+    domain: {{ .Values.loadBalancer.domain }}
+    type: {{ .Values.loadBalancer.type }}
+    {{- if .Values.loadBalancer.annotations }}
+    annotations: 
+{{ toYaml .Values.loadBalancer.annotations | trim | indent 6 }}
+    {{- end }}
+    {{- if .Values.loadBalancer.bootstrapPrefix }}
+    bootstrapPrefix: {{ .Values.loadBalancer.bootstrapPrefix }}
+    {{- end }}
+    {{- if .Values.loadBalancer.brokerPrefix }}
+    brokerPrefix: {{ .Values.loadBalancer.brokerPrefix }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.tls.enabled }}
+  {{- $_ := required "Fullchain PEM cannot be empty" .Values.tls.fullchain }}
+  {{- $_ := required "Private key pem cannot be empty." .Values.tls.privkey }}
+  tls:
+     enabled: {{ .Values.tls.enabled }}
+     {{- if and .Values.tls.authentication (not (empty .Values.tls.authentication.type)) }}
+     authentication:
+        type: {{ .Values.tls.authentication.type }}
+     {{- end }}
+  {{- end }}
+{{- if (eq (len $.Values.global.provider.kubernetes.deployment.zones) 0) }}
+{{- fail "Provide atleast 1 zone information for .Values.global.provider.kubernetes.deployment.zones " }}
+{{- end }}  
+  zones: 
+{{ toYaml .Values.global.provider.kubernetes.deployment.zones | trim | indent 4 }}

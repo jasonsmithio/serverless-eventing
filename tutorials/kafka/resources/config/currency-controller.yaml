@@ -1,10 +1,10 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: stock-producer
+  name: currency-controller
 spec:
   template:
     spec:
       containers:
-      - image: gcr.io/PROJECT_ID/producer:v1
+      - image: gcr.io/PROJECT_ID/currency-controller:v1
         imagePullPolicy: Always
