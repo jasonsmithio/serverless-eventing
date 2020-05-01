@@ -38,13 +38,25 @@ Install Helm version 3
 Now lets download our repo and install the [Confluent Operator](https://docs.confluent.io/current/tutorials/examples/kubernetes/gke-base/docs/index.html "Confluent Operator")
 
 ```bash
-git clone https://github.com/TheJaySmith/serverless-eventing
-cd tutorials/kafka/manifests/confluent
+git clone https://github.com/confluentinc/examples
+cd examples/kubernetes/gke-base
+```
+
+We will also download our customiations to the directory.
+
+```bash
+curl https://raw.githubusercontent.com/TheJaySmith/confluent-kafka-on-gcp/master/kafka/gke/Makefile-impl --output Makefile-impl
+curl https://raw.githubusercontent.com/TheJaySmith/confluent-kafka-on-gcp/master/kafka/gke/cfg/values.yaml --output cfg/values.yaml
+curl https://raw.githubusercontent.com/TheJaySmith/confluent-kafka-on-gcp/master/kafka/gke/kafka-nginx-ingress.yaml --output kafka-nginx-ingress.yaml
+```
+
+And let's install the cluster.
+
+```bash
 make gke-create-cluster
 make demo
 ```
 
-This is a fork of the [Confluent Examples GitHub](https://github.com/confluentinc/examples "Confluent Examples GitHub"). In order to control the environment, I forked this.
 
 Now let's see what's installed.
 
@@ -106,6 +118,14 @@ helm upgrade --namespace operator --set global.initContainer.image.tag=5.4.1.0 -
 
 We will do this on a separate cluster. The purposes is to simulate an environment where your application lives on one cluster and the Kafka brokers are hosted somewhere else. While we use a Kubernetes cluster in this example, it could just as easily be a hosted solution, bare metal, VMs, etc.
 
+First let's download our directory
+
+```bash
+cd $HOME
+git clone https://github.com/TheJaySmith/serverless-eventing
+cd serverless-eventing
+```
+
 I have created a script called `setup-cloudrun.sh` that simplifies the staging process. It will attempt to install [Google Cloud SDK](https://cloud.google.com/sdk/) if you don’t have it installed already. If it can execute `gcloud`, it skips this step. It will then do the following.
 
 - Enable Google Cloud APIs if they aren’t already enabled
@@ -117,7 +137,6 @@ I have created a script called `setup-cloudrun.sh` that simplifies the staging p
 Now let's navigate back to the `serverless-eventing` directory and run the script.
 
 ```bash
-cd ../../../..
 chmod +x scripts/setup-cloudrun.sh
 sh scripts/setup-cloudrun.sh
 ```

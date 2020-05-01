@@ -1,4 +1,4 @@
-![image](../images/confluent-logo-300-2.png)
+<!--[image](../images/confluent-logo-300-2.png)
 
 # Overview
 
@@ -15,4 +15,8 @@ See each individual use case above for detailed documentation on running the dem
 
 For further details on Confluent Operator, see the official [Operator Documentation](https://docs.confluent.io/current/installation/operator/co-deployment.html?utm_source=github&utm_medium=demo&utm_campaign=ch.examples_type.community_content.kubernetes).
 
-For more details on Kubernetes, see the official [Kubernetes Docs](https://kubernetes.io/docs/home/).
+For more details on Kubernetes, see the official [Kubernetes Docs](https://kubernetes.io/docs/home/).-->
+
+# DO NOT USE THIS CONFLUENT OPERATOR. USE THE ONE PROVIDED BY CONFLUENT AS IT IS MORE UP TO DATE
+
+[Confluent Operator](https://docs.confluent.io/current/tutorials/examples/kubernetes/gke-base/docs/index.html "Confluent Operator")
