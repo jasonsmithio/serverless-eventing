@@ -1,5 +1,7 @@
 # Serverlesss Eventing With Kafka
 
+__Corresponding [Blog Post](https://thejaysmith.com/titles/serverlessjay/serverless-eventing-modernizing-legacy-streaming-with-kafka/ "Blog Post")__
+
 [Knative Eventing](https://knative.dev/docs/eventing/) offers a variety of EventSources to use for building a serverless eventing platform. In my [previous blog post](https://thejaysmith.com/titles/blogroll/serverless-eventing-sinkbinding-101/) I talk about [SinkBinding](https://github.com/TheJaySmith/serverless-eventing/tree/master/tutorials/twitter-sink-binding) and we use the technology to create an EventSource the pulls Twitter data.
 
 This tutorial will show you how to use [Apache Kafka](https://kafka.apache.org/) as a Knative Eventing source. Now there are many options for deploying Kafka on a Kubernetes cluster. I am using [Confluent's](https://confluent.co) Kafka Kubernetes Operator. I forked the operator found [here](https://docs.confluent.io/current/tutorials/examples/kubernetes/gke-base/docs/index.html?utm_source=github&utm_medium=demo&utm_campaign=ch.examples_type.community_content.kubernetes) to use.

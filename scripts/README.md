@@ -1,5 +1,7 @@
 # Creating a Sink Binding to pull from Twitter
 
+__Corresponding [Blog Post](https://thejaysmith.com/titles/blogroll/serverless-eventing-sinkbinding-101/ "Blog Post")__
+
 Knative Eventing offers many types of [event sources](https://knative.dev/docs/eventing/sources/) that a developer can use to create a streaming application. In this demo, we will talk about [SinkBinding](http://knative.dev/docs/eventing/samples/sinkbinding/) and use [Twitter’s API](https://developer.twitter.com/en/docs).
 
 First we should define some terms. If you have played with Knative a bit, you may remember a concept called [ContainerSource](https://knative.dev/docs/eventing/samples/container-source/).  This allowed you to create a container as an event source. For example, you could create a container that produces a random number every ten seconds then sends it to an event broker to be consumed by your application.
