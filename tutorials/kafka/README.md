@@ -96,10 +96,10 @@ Final step, we will setup a wildcard DNS using [xip.io](xip.io "xip.io"). First 
 export KAFKA_IP=$(kubectl get service kafka-bootstrap-lb -n operator -o=jsonpath='{.status.loadBalancer.ingress[].ip}')
 ```
 
-and then we reapply the Helm chart with the added IP address.
+and then we reapply the Helm chart with the added IP address. **PLEASE NOTE** this assumes that you are executing in the `gke` directory.
 
 ```bash
-helm upgrade --namespace operator --set global.initContainer.image.tag=5.4.1.0 --set global.provider.region=us-central1 --set global.provider.kubernetes.deployment.zones={us-central1-a}  --set kafka.image.tag=5.4.1.0 --set kafka.replicas=1 --set kafka.enabled=true  --set kafka.loadBalancer.enabled=true --set kafka.loadBalancer.domain=${KAFKA_IP}.xip.io -f $HOME/confluent-kafka-on-gcp/kafka/gke/cfg/values.yaml kafka $HOME/confluent-kafka-on-gcp/kafka/common/cp/operator/20200310-v0.142.1/helm/confluent-operator
+helm upgrade --namespace operator --set global.initContainer.image.tag=5.4.1.0 --set global.provider.region=us-central1 --set global.provider.kubernetes.deployment.zones={us-central1-a}  --set kafka.image.tag=5.4.1.0 --set kafka.replicas=1 --set kafka.enabled=true  --set kafka.loadBalancer.enabled=true --set kafka.loadBalancer.domain=${KAFKA_IP}.xip.io -f cfg/values.yaml kafka ../common/cp/operator/20200310-v0.142.1/helm/confluent-operator
 ```
 
 ## Install Cloud Run for Anthos
