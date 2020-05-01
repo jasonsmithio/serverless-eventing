@@ -45,9 +45,8 @@ cd examples/kubernetes/gke-base
 We will also download our customiations to the directory.
 
 ```bash
-curl https://raw.githubusercontent.com/TheJaySmith/confluent-kafka-on-gcp/master/kafka/gke/Makefile-impl --output Makefile-impl
-curl https://raw.githubusercontent.com/TheJaySmith/confluent-kafka-on-gcp/master/kafka/gke/cfg/values.yaml --output cfg/values.yaml
-curl https://raw.githubusercontent.com/TheJaySmith/confluent-kafka-on-gcp/master/kafka/gke/kafka-nginx-ingress.yaml --output kafka-nginx-ingress.yaml
+curl https://raw.githubusercontent.com/TheJaySmith/serverless-eventing/master/tutorials/kafka/manifests/confluent/gke/Makefile-impl --output Makefile-impl
+curl https://raw.githubusercontent.com/TheJaySmith/serverless-eventing/master/tutorials/kafka/manifests/confluent/gke/cfg/values.yaml --output cfg/values.yaml
 ```
 
 And let's install the cluster.
@@ -56,7 +55,6 @@ And let's install the cluster.
 make gke-create-cluster
 make demo
 ```
-
 
 Now let's see what's installed.
 
@@ -99,6 +97,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/ngin
 Finally, we will create the ingress for Confluent Kafka.
 
 ```bash
+curl https://raw.githubusercontent.com/TheJaySmith/serverless-eventing/master/tutorials/kafka/manifests/confluent/gke/kafka-nginx-ingress.yaml --output kafka-nginx-ingress.yaml
 kubectl apply -f kafka-nginx-ingress.yaml -n operator
 ```
 
