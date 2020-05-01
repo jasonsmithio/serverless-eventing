@@ -198,7 +198,7 @@ cd ../producer
  But first, let's do a quick change to the file.
 
 ```bash
-sed 's/KAFKA_IP/'${KAFKA_IP}'/g' producer.py > producer.py
+sed -i 's/KAFKA_IP/'${KAFKA_IP}'/g' producer.py 
 ```
 
 Now let's look at `producer.py`
@@ -248,17 +248,38 @@ First let's check out our config files.
 
 ```bash
 cd ../../config
-sed 's/PROJECT_ID/'${PROJECT_ID}'/g' currency-controller.yaml > currency-controller.yaml
-sed 's/PROJECT_ID/'${PROJECT_ID}'/g' currency-kafka.yaml > currency-kafka.yaml
+sed -i 's/PROJECT_ID/'${PROJECT_ID}'/g' currency-controller.yaml
+sed -i 's/PROJECT_ID/'${PROJECT_ID}'/g' currency-kafka.yaml
 ```
 
 We entered the `config` directory and added our `PROJECT_ID` to the `currency-controller.yaml` and `currency-kafka.yaml` files.
 
-`currency-controller.yaml` will deploy a Knative Service for our controller container. This will generate our messages as the **event source**. `currency-kafka.yaml` will deploy a Knative service for our currency-kafka container. This will receive the messages from the controller. We call this the **event si
+`currency-controller.yaml` will deploy a [Knative Service](https://knative.dev/docs/serving/services/creating-services/ "Knative Service") for our controller container. This will generate our messages as the **event source**. `currency-kafka.yaml` will deploy a Knative service for our currency-kafka container. This will receive the messages from the controller. We call this the **event si
 
 Lets deploy these. Now they should be deployed in a sequence so give about 10 seconds to each one before you deploy the next.
 
-First we will deploy the binding. This file will tell us to bind our event source (`currency-controller`) to our event sink (`currency-kafka`).
+First we will deploy the binding. This file will tell us to bind our event source (`currency-controller`) to our event sink (`currency-kafka`). Lets examine this first.
+
+```bash
+apiVersion: sources.knative.dev/v1alpha2
+kind: SinkBinding
+metadata:
+  name: currency-sink-bind
+spec:
+  subject:
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    name: currency-controller
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: currency-kafka
+```
+
+Here you can see that we deploy the SinkBinding undo the name `currency-sink-bind`. This will take the "subject" as the event source and the sink as the event sink. For these purposes we are using a Knative Service but [SinkBinding](https://knative.dev/docs/eventing/samples/sinkbinding/ "SinkBinding") does allow for you to use other Kubernetes objects such as datasets.
+
+Now let's deploy.
 
 ```bash
 kubectl apply -f currency-sink-bind.yaml
@@ -267,10 +288,40 @@ kubectl apply -f currency-sink-bind.yaml
 Next we deploy the currency-kafka service. We want to ensure that our sink is ready to receive before we deploy the source.
 
 ```bash
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: currency-kafka
+spec:
+  template:
+    spec:
+      containers:
+      - image: gcr.io/PROJECT_ID/currency-kafka:v1
+        imagePullPolicy: Always
+```
+
+This is a standard Knative Service for currency Kafka. Now lets deploy.
+
+```bash
 kubectl apply -f currency-kafka.yaml
 ```
 
-Finally we deploy the currency-controller service. This will start creating information as soon as we deploy
+Finally we deploy the currency-controller service. This will start creating events as soon as we deploy. Let's look at the file
+
+```bash
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: currency-controller
+spec:
+  template:
+    spec:
+      containers:
+      - image: gcr.io/PROJECT_ID/currency-controller:v1
+        imagePullPolicy: Always
+```
+
+and deploy...
 
 ```bash
 kubectl apply -f currency-controller.yaml
@@ -286,7 +337,7 @@ You should see the `controller` and `kafka` service running.
 
 ## Let's Test
 
-There is a tool that I like called *Kafkacat*. It's an open source CLI that makes it pretty easy to work with a Kafka broker without a JVM. You can download it [here]('https://github.com/edenhill/kafkacat') and follow the instructions for your system.
+There is a tool that I like called *Kafkacat*. It's an open source CLI that makes it pretty easy to work with a Kafka broker without a JVM. You can download it [here](https://github.com/edenhill/kafkacat "here") and follow the instructions for your system.
 
 In the same `config` directory run this.
 
@@ -314,6 +365,8 @@ If done correctly, you should see a new number pop up every 30 seconds like:
 Sending data from a source to a single sink may not seem impressive but let's imagine scaling. We want to create sources for every posssible currency exchange and send them to Kafka but you don't want to force write N Kafka connectors for each currency type. You also don't want to write a large monolithic application that handles every possible message type to simplify.
 
 While adopting microservices, you just create event-sources to generate the events then use the SinkBinding to tell the events where to go. In this example, we used a single event-sink but you could further scale it out with [Channels](https://knative.dev/docs/eventing/channels/) and [Brokers](https://knative.dev/docs/eventing/broker-trigger/) which I will explain in a later tutorial.
+
+PLEASE NOTE: This is an example of how to deploy Kafka on Kubernetes and create a streaming application. Realistically, you would want to make a larger Kubernetes cluster for Kafka and consider how you would secure and expose the brokers. 
 
 ## End
 
