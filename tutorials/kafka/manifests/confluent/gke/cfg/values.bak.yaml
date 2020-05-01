@@ -1,20 +1,20 @@
 global:
   provider:
     registry:
-      fqdn: docker.io 
-    name: gcp 
+      fqdn: docker.io
+    name: gcp
     storage:
-      provisioner: kubernetes.io/gce-pd 
-      reclaimPolicy: Delete 
+      provisioner: kubernetes.io/gce-pd
+      reclaimPolicy: Delete
       parameters:
-        type: pd-ssd 
+        type: pd-ssd
 
 zookeeper:
   disableHostPort: true
   resources:
     cpu: 200m
     memory: 512Mi
-  
+
 kafka:
   disableHostPort: true
   resources:
@@ -22,7 +22,8 @@ kafka:
     memory: 1Gi
   loadBalancer:
     enabled: true
-    domain: mydev.gcp.cloud
+    type: external
+    domain: mydevplatform.gcp.cloud
   tls:
     enabled: false
   metricReporter:
@@ -34,11 +35,11 @@ kafka:
 schemaregistry:
   dependencies:
     kafka:
-      bootstrapEndpoint: kafka:9071 
+      bootstrapEndpoint: kafka:9071
 
 connect:
   image:
-    repository: cnfldemos/cp-server-connect-operator-datagen 
+    repository: cnfldemos/cp-server-connect-operator-datagen
   tls:
     enabled: false
   loadBalancer:
@@ -48,8 +49,8 @@ connect:
       brokerCount: 1
       bootstrapEndpoint: kafka:9071
     schemaregistry:
-      enabled: true 
-      url: http://schemaregistry:8081 
+      enabled: true
+      url: http://schemaregistry:8081
 
 controlcenter:
   loadBalancer:
