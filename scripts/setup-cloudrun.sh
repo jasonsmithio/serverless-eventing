@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-#### logging 
-exec > (tee -i logfile.txt)
 
 #### Declare MYROOT directory for cloned repo
 export MYROOT=$(pwd)
