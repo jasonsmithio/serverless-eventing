@@ -21,4 +21,4 @@ RUN apt-get update && \
 # webserver, with one worker process and 8 threads.
 # For environments with multiple CPU cores, increase the number of workers
 # to be equal to the cores available.
-ENTRYPOINT ["python", "-u", "/currency.py"]
+ENTRYPOINT ["python", "-u", "./currency.py"]
