@@ -218,7 +218,7 @@ cd ../producer
  But first, let's do a quick change to the file.
 
 ```bash
-sed -i 's/KAFKA_IP/'${KAFKA_IP}'/g' producer.py 
+sed -i '' 's/KAFKA_IP/'${KAFKA_IP}'/g' producer.py
 ```
 
 Now let's look at `producer.py`
@@ -268,8 +268,8 @@ First let's check out our config files.
 
 ```bash
 cd ../../config
-sed -i 's/PROJECT_ID/'${PROJECT_ID}'/g' currency-controller.yaml
-sed -i 's/PROJECT_ID/'${PROJECT_ID}'/g' currency-kafka.yaml
+sed -i '' 's/PROJECT_ID/'${PROJECT_ID}'/g' currency-controller.yaml
+sed -i '' 's/PROJECT_ID/'${PROJECT_ID}'/g' currency-kafka.yaml
 ```
 
 We entered the `config` directory and added our `PROJECT_ID` to the `currency-controller.yaml` and `currency-kafka.yaml` files.
