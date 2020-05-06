@@ -205,7 +205,7 @@ We first create an AlphaVantage object using our key called `afx`. The `make_msg
 Now lets build the containers and push them to [Google Container Registry](https://cloud.google.com/container-registry "Google Container Registry").
 
 ```bash
-docker build -t gcr.io/${PROJECT_ID}/currency-controller:v1 .
+docker build -t gcr.io/${PROJECT_ID}/currency-controller:v1 --build-arg PROJECT=${PROJECT_ID} .
 docker push gcr.io/${PROJECT_ID}/currency-controller:v1
 ```
 
