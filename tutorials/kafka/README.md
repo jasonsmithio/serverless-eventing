@@ -386,7 +386,7 @@ Sending data from a source to a single sink may not seem impressive but let's im
 
 While adopting microservices, you just create event-sources to generate the events then use the SinkBinding to tell the events where to go. In this example, we used a single event-sink but you could further scale it out with [Channels](https://knative.dev/docs/eventing/channels/) and [Brokers](https://knative.dev/docs/eventing/broker-trigger/) which I will explain in a later tutorial.
 
-PLEASE NOTE: This is an example of how to deploy Kafka on Kubernetes and create a streaming application. Realistically, you would want to make a larger Kubernetes cluster for Kafka and consider how you would secure and expose the brokers. 
+PLEASE NOTE: This is an example of how to deploy Kafka on Kubernetes and create a streaming application. Realistically, you would want to make a larger Kubernetes cluster for Kafka and consider how you would secure and expose the brokers.
 
 ## End
 
