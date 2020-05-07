@@ -120,7 +120,7 @@ We will do this on a separate cluster. The purposes is to simulate an environmen
 First let's download our directory
 
 ```bash
-cd $HOME
+cd ../../..
 git clone https://github.com/TheJaySmith/serverless-eventing
 cd serverless-eventing
 ```
