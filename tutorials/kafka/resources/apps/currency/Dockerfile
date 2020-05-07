@@ -8,9 +8,8 @@ WORKDIR $APP_HOME
 COPY . ./
 
 ARG PROJECT_ID
-ARG SYMBOL
-ENV PROJECT_ID=${PROJECT_ID}
-ENV SYMBOL=${SYMBOL}
+ENV PROJECT_ID ${PROJECT_ID}
+
 
 # Install production dependencies.
 RUN apt-get update && \

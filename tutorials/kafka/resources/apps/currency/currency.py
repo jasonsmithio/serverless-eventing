@@ -9,6 +9,8 @@ from pathlib import Path  # python3 only
 
 from alpha_vantage.timeseries import TimeSeries
 
+from alpha_vantage.foreignexchange import ForeignExchange
+
 sink_url = os.getenv('K_SINK')
 
 PROJECT_ID = os.environ.get('PROJECT_ID')
@@ -30,8 +32,7 @@ def make_msg(message):
 def get_currency():
     data, _ = afx.get_currency_exchange_rate(
             from_currency=CURR1, to_currency=CURR2)
-    exchangeObj = json.dumps(data)
-    exrate = float(exchange['5. Exchange Rate'])
+    exrate = data['5. Exchange Rate']
     return exrate
 
 
