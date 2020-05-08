@@ -142,7 +142,7 @@ sh scripts/setup-cloudrun.sh
 
 ## Setup AlphaVantage
 
-For demos, [AlphaVantage](alphavantage.co "AlphaVantage") is my goto source. They have a free tier that allows around 500 APU calls/day and it's easy to sign up. You can get your key [here](https://www.alphavantage.co/support/#api-key "here").
+For demos, [AlphaVantage](alphavantage.co "AlphaVantage") is my goto source. They have a free tier that allows around 500 API calls/day and it's easy to sign up. You can get your key [here](https://www.alphavantage.co/support/#api-key "here").
 
 Cloud Secret Manager
 
@@ -188,8 +188,7 @@ def make_msg(message):
 def get_currency():
     data, _ = afx.get_currency_exchange_rate(
             from_currency=CURR1, to_currency=CURR2)
-    exchangeObj = json.dumps(data)
-    exrate = float(exchange['5. Exchange Rate'])
+    exrate = data['5. Exchange Rate']
     return exrate
 
 
