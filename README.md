@@ -1,3 +1,5 @@
 # Serverless Eventing Journey
 
- You can follow this on [TheJaySmith.com](https://thejaysmith.com/category/titles/serverlessjay/severless-eventing/).
+<img src="./assets/images/serverless-eventing-logo.png" width="250" height="250">
+
+ You can follow this on [serverlesseventing.com](https://serverlesseventing.com).
