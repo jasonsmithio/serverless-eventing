@@ -93,7 +93,7 @@ gcloud beta container clusters create $CLUSTER_NAME \
 echo "***** Waiting for 90 second for cluster to complete *****"
 sleep 90
 
-# Configure Cloud Run with Clust
+# Configure Cloud Run with Cluster
 gcloud config set run/platform gke
 gcloud config set run/cluster $CLUSTER_NAME
 gcloud config set run/cluster_location $ZONE
@@ -118,16 +118,16 @@ kubectl patch configmap config-domain --namespace knative-serving --patch \
 ## Install Knative Eventing
 echo "Install Knative Eventing"
 kubectl apply --selector knative.dev/crd-install=true \
---filename https://github.com/knative/eventing/releases/download/v0.13.0/eventing-crds.yaml 
+--filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-crds.yaml 
 
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.13.0/eventing-core.yaml \
---filename https://github.com/knative/serving/releases/download/v0.13.0/monitoring-core.yaml
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-core.yaml \
+--filename https://github.com/knative/eventing/releases/download/v0.16.0/in-memory-channel.yaml
 
 
 # Install Advanced Monitoring
-kubectl apply --filename https://github.com/knative/serving/releases/download/v0.13.0/monitoring-metrics-prometheus.yaml \
---filename https://github.com/knative/serving/releases/download/v0.13.0/monitoring-logs-elasticsearch.yaml \
---filename https://github.com/knative/serving/releases/download/v0.13.0/monitoring-tracing-jaeger.yaml
+kubectl apply --filename https://github.com/knative/serving/releases/download/v0.16.0/monitoring-core.yaml \
+--filename https://github.com/knative/serving/releases/download/v0.16.0/monitoring-metrics-prometheus.yaml \
+--filename hhttps://github.com/knative/serving/releases/download/v0.16.0/monitoring-tracing-jaeger-in-mem.yaml
 
 # Enable Secret Admin to compute service account
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$PROJ_NUMBER-compute@developer.gserviceaccount.com --role roles/secretmanager.admin
