@@ -1,0 +1,27 @@
+apiVersion: "nats.io/v1alpha2"
+kind: "NatsCluster"
+metadata:
+  name: "knative-nats-cluster-selfsign"
+spec:
+  # Number of nodes in the cluster
+  size: 3
+  version: "1.3.0"
+
+  tls:
+    # Certificates to secure the NATS client connections:
+    serverSecret: "nats-clients-tls"
+    # Name of the CA in serverSecret
+    serverSecretCAFileName: "ca.crt"
+    # Name of the key in serverSecret
+    serverSecretKeyFileName: "tls.key"
+    # Name of the certificate in serverSecret
+    serverSecretCertFileName: "tls.crt"
+
+    # Certificates to secure the routes.
+    routesSecret: "nats-routes-tls"
+    # Name of the CA in routesSecret
+    routesSecretCAFileName: "ca.crt"
+    # Name of the key in routesSecret
+    routesSecretKeyFileName: "tls.key"
+    # Name of the certificate in routesSecret
+    routesSecretCertFileName: "tls.crt"

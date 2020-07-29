@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nats-admin-user
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nats-user
+---
+apiVersion: nats.io/v1alpha2
+kind: NatsServiceRole
+metadata:
+  name: nats-user
+  namespace: nats-io
+
+  # Specifies which NATS cluster will be mapping this account.
+  labels:
+    nats_cluster: example-nats
+spec:
+  permissions:
+    publish: ["foo.*", "foo.bar.quux"]
+    subscribe: ["foo.bar"]
+---
+apiVersion: nats.io/v1alpha2
+kind: NatsServiceRole
+metadata:
+  name: nats-admin-user
+  namespace: nats-io
+  labels:
+    nats_cluster: example-nats
+spec:
+  permissions:
+    publish: [">"]
+    subscribe: [">"]

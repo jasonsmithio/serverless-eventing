@@ -1,0 +1,20 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: nats-server-tls
+spec:
+  secretName: nats-server-tls
+  duration: 2160h # 90 days
+  renewBefore: 240h # 10 days
+  usages:
+  - signing
+  - key encipherment
+  - server auth
+  issuerRef:
+    name: nats-ca
+    kind: Issuer
+  organization:
+  - Your organization
+  commonName: nats.nats-io.svc.cluster.local
+  dnsNames:
+  - nats.nats-io.svc
