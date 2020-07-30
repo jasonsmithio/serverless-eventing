@@ -5,3 +5,5 @@ twitter-deploy.yaml
 twitter-sink.yaml
 twitter-svc.yaml
 *.pem
+staging
+nats-source/

@@ -59,8 +59,14 @@ Now it is time to setup NATS. Let's install the NATS operator first.
 
 ```bash
 kubectl create ns nats-io
+
+#Install NATS Operator
 kubectl apply -f https://github.com/nats-io/nats-operator/releases/latest/download/00-prereqs.yaml
 kubectl apply -f https://github.com/nats-io/nats-operator/releases/latest/download/10-deployment.yaml
+
+#Install NATS Streaming Server
+kubectl apply -f https://raw.githubusercontent.com/nats-io/k8s/master/nats-server/simple-nats.yml
+kubectl apply -f https://raw.githubusercontent.com/nats-io/k8s/master/nats-streaming-server/simple-stan.yml
 ```
 
 Now let's take a look at our files.
