@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: natss-channel
+  namespace: knative-eventing
+data:
+  channelTemplateSpec: |
+    apiVersion: messaging.knative.dev/v1alpha1
+    kind: NatssChannel
+    spec:
+      numPartitions: 3
+      replicationFactor: 
