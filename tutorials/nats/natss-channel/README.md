@@ -70,16 +70,10 @@ kubectl apply --filename https://raw.githubusercontent.com/knative/eventing-cont
 Now let's take a look at our files.
 
 ```bash
-cd tutorials/nats/nats-channel/
+cd tutorials/nats/natss-channel/
 ```
 
 Let's now setup our NATS Channel. All of our Kubernetes Application YAML files are located in the `config/` directory.
-
-<!--
-```bash
-kubectl apply -f config/
-```
--->
 
 ```bash
 mkdir -p build/src/knative.dev
@@ -87,13 +81,13 @@ cd build/src/knative.dev
 git clone git@github.com:knative/eventing-contrib.git
 cd eventing-contrib
 ko apply -f natss/config
-cd ../../..
+cd ../../../..
 ```
 
 Now let's install our NATS Channel called "nats-test-channel"
 
 ```bash
-kubectl apply -f manifests/nats-test-channel.yaml
+kubectl apply -f manifests/natss-test-channel.yaml
 ```
 
 Now let's verify that this was installed properly. First let's check the NATSS Channel Controller is located in one Pod.
@@ -125,6 +119,136 @@ kubectl get brokers natss-backed-broker
 
 ## NATS BOX
 
+After setting up NATS Streaming, it's nice to be able to test on cluster. This is especially important if all of the operations are expected to run on cluster. You wouldn't necessarily wnat to expose the services to the larger internet. The NATS team has provided us with a handy tool called [NATS Box](https://github.com/nats-io/nats-box, "NATS Box"). You deploy the a container in a pod in Kubernetes and test as if you were a service on the same cluter.
+
+Open a new tab in your terminal and run the below command to enter the NATS Box for publishing.
+
 ```bash
-kubectl run -i --rm --tty nats-box --image=synadia/nats-box --restart=Never
+kubectl run -i --rm --tty nats-box-pub --image=synadia/nats-box --restart=Never
+```
+
+Now we will publish an event to the "hello" subject. The message will be "test".
+
+```bash
+stan-pub -s nats://nats-streaming.natss.svc:4222 -c knative-nats-streaming hello test
+```
+
+Open a second terminal tab and we will use this command to create a new NATS Box for subscribing.
+
+```bash
+kubectl run -i --rm --tty nats-box-sub --image=synadia/nats-box --restart=Never
+```
+
+Run the below command to consume from the "hello" subject. 
+
+```bash
+stan-sub -s nats://nats-streaming.natss.svc:4222 -c knative-nats-streaming hello
+```
+
+You should see something like this.
+
+```bash
+[#1] Received: sequence:1 subject:"hello" data:"test" timestamp:1596228651186265865
+```
+
+If you see something like the above, then you are good to go!
+
+## Setup AlphaVantage
+
+For demos, [AlphaVantage](alphavantage.co "AlphaVantage") is my goto source. They have a free tier that allows around 500 API calls/day and it's easy to sign up. You can get your key [here](https://www.alphavantage.co/support/#api-key "here").
+
+Some people have asked why I always recommend AlphaVantage when I do these demos. I will say that they pay me absolutely nothing to promote them. I just really like using their API for Serverless Eventing demos as financial data tends to be real-time in nature.
+
+### Cloud Secret Manager
+
+Google Cloud recently GA’d [Cloud Secret Manager](https://cloud.google.com/secret-manager/) which gives you the ability to securely store your secrets encrypted in Google Cloud. Remember those four Twitter API keys we had earlier? We are going to store them in Google Cloud using the Secret Manager.
+
+We will go from the Hamburger -> Security -> Secrets.
+
+![secret manager](https://raw.githubusercontent.com/TheJaySmith/serverless-eventing/master/assets/images/secret-manager.png)
+
+Let’s now Create a secret. We will name this secret `alpha-vantage-key` and give it the "Value" of the API Key you just created. You have now created a secured value that our applicaiton will use.
+
+## Building our Applications
+
+Let's now build our application. First, let's make sure that `gcloud` will be properly authenitcated with the `docker` command. If you do not have Docker installed, you can find it [here](https://docs.docker.com/get-docker/ "here").
+
+```bash
+gcloud auth configure-docker
+```
+
+Next we will build our currency app. Let's go to the currency app folder.
+
+```bash
+cd app/currency/
+```
+
+Let's take a look at the app in the `currency.py` file.
+
+```bash
+CURR1 = 'USD'
+CURR2 = 'JPY'
+```
+
+These are the currency values that we will be using. While I have hardcoded 'USD' and 'JPY', you can change this to anything that you want.
+
+```bash
+afx = ForeignExchange(key=ALPHAVANTAGE_KEY)
+
+def make_msg(message):
+    msg = '{"msg": "%s"}' % (message)
+    return msgs
+
+
+def get_currency():
+    data, _ = afx.get_currency_exchange_rate(
+            from_currency=CURR1, to_currency=CURR2)
+    exrate = data['5. Exchange Rate']
+    return exrate
+
+
+while True:
+    headers = {'Content-Type': 'application/cloudevents+json'}
+    body = get_currency()
+    requests.post(sink_url, data=json.dumps(body), headers=headers)
+    time.sleep(30)
+```
+
+We first create an AlphaVantage object using our key called `afx`. The `make_msg` function formats the function. The `def_currency` function will use CURR1 and CURR2 and return an exchange rate. The while loop will execute the `def_currency` function, get the exchange rate, and send it to our event sink every 30 seconds. You could make it more or less but I chose '30' as it will give you more time to play with it during the 500 calls/day limit.
+
+Now lets build the containers and push them to [Google Container Registry](https://cloud.google.com/container-registry "Google Container Registry").
+
+```bash
+docker build --build-arg PROJECT_ID=${PROJECT_ID} -t gcr.io/${PROJECT_ID}/currency-natss:v1  .
+docker push gcr.io/${PROJECT_ID}/currency-natss:v1
+```
+
+Now we will build our `natss-client`. This application will receive the financial messages and send them to the NATS Streaming Server.
+
+```bash
+cd ../natss-channel/
+```
+
+Now let's build the containers.
+
+```bash
+docker build -t gcr.io/${PROJECT_ID}/natss-client:v1 .
+docker push gcr.io/${PROJECT_ID}/natss-client:v1
+```
+
+Great, now it is time to test and deploy.
+
+## Deploy and Use
+
+First let's check out our manifests files.
+
+```bash
+cd ../../manifests
+sed -i '' 's/PROJECT_ID/'${PROJECT_ID}'/g' natss-client.yaml
+```
+
+```bash
+kubectl apply -f natss-trigger.yaml
+kubectl apply -f natss-service.yaml
+kubectl apply -f natss-client.yaml
 ```

@@ -1,5 +1,6 @@
 .vscode
 .env
+logfile.txt
 __pycache__
 twitter-deploy.yaml
 twitter-sink.yaml

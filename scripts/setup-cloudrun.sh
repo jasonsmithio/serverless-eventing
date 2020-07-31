@@ -116,6 +116,8 @@ kubectl patch configmap config-domain --namespace knative-serving --patch \
 '{"data": {"example.com": null, "'"$EXTERNAL_IP"'.xip.io": ""}}'
 
 ## Install Knative Eventing
+## https://knative.dev/docs/install/any-kubernetes-cluster/#installing-the-eventing-component
+
 echo "Install Knative Eventing"
 kubectl apply --selector knative.dev/crd-install=true \
 --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-crds.yaml 
