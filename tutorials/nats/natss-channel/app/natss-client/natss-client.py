@@ -17,22 +17,7 @@ from nats.aio.errors import ErrConnectionClosed, ErrTimeout, ErrNoServers
 
 app = Flask(__name__)
 
-
-def info(msg):
-    app.logger.info(msg)
-
-@app.route('/', methods=['POST'])
-def default_route():
-    if request.method == 'POST':
-        content = request.data.decode('utf-8')
-        info(f'Event Display received event: {content}')
-
-        producer.send('money-demo', bytes(content, encoding='utf-8'))
-
-        return jsonify(hello=str(content))
-    else:
-        return jsonify('hello world')
-
+# Async with NATS Streaming
 async def run(loop):
     nc = NATS()
 
@@ -81,21 +66,45 @@ async def run(loop):
     # Terminate connection to NATS.
     await nc.close()
 
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(run(loop))
-    loop.close()
+## Logger
+
+def info(msg):
+    app.logger.info(msg)
+
+
+## App Route
+
+@app.route('/', methods=['POST'])
+def default_route():
+    if request.method == 'POST':
+        content = request.data.decode('utf-8')
+        info(f'Event Display received event: {content}')
+
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(run(loop))
+        loop.close()
+
+        return jsonify(hello=str(content))
+    else:
+        return jsonify('No Data')
+
+
+
+#if __name__ == '__main__':
+#    loop = asyncio.get_event_loop()
+#    loop.run_until_complete(run(loop))
+#    loop.close()
 
 
 
 
+## Rnu Flask
 
-
-#if __name__ != '__main__':
-#    # Redirect Flask logs to Gunicorn logs
-#    gunicorn_logger = logging.getLogger('gunicorn.error')
-#    app.logger.handlers = gunicorn_logger.handlers
-#    app.logger.setLevel(gunicorn_logger.level)
-#    info('Event Display starting')
-#else:
-#    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+if __name__ != '__main__':
+    # Redirect Flask logs to Gunicorn logs
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
+    info('Event Display starting')
+else:
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))

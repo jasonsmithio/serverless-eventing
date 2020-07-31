@@ -1,0 +1,10 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: natss-currency
+spec:
+  template:
+    spec:
+      containers:
+      - image: gcr.io/PROJECT_ID/nats-currency:v1
+        imagePullPolicy: Always

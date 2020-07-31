@@ -245,10 +245,33 @@ First let's check out our manifests files.
 ```bash
 cd ../../manifests
 sed -i '' 's/PROJECT_ID/'${PROJECT_ID}'/g' natss-client.yaml
+sed -i '' 's/PROJECT_ID/'${PROJECT_ID}'/g' natss-currency.yaml
 ```
 
+First we will deploy a SinkBinding. Here you can see that we deploy the SinkBinding undo the name `natss-currency-sink-bind`. This will take the "subject" as the event source and the sink as the event sink. For these purposes we are using a Knative Service but [SinkBinding](https://knative.dev/docs/eventing/samples/sinkbinding/ "SinkBinding") does allow for you to use other Kubernetes objects such as datasets. I also have a demo [here](https://github.com/TheJaySmith/serverless-eventing/tree/master/tutorials/twitter-sink-binding, "here").
+
+So let's up our binding.
+
 ```bash
-kubectl apply -f natss-trigger.yaml
-kubectl apply -f natss-service.yaml
+kubectl apply -f natss-currency-sink-bind.yaml
+```
+
+Next we deploy the `natss-client` service. We want to ensure that our sink is ready to receive before we deploy the source. This service will act as the publisher to the NATS Streaming Server.
+
+```bash
 kubectl apply -f natss-client.yaml
+```
+
+Finally we deploy the `natss-currency` service. This will start creating events as soon as we deploy.
+
+```bash
+kubectl apply -f natss-currency.yaml
+```
+
+All of our services are deployed so let's move on.
+
+## Testing Time
+
+```bash
+kubectl apply -f natss-viewer.yaml
 ```
