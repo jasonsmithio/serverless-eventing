@@ -1,0 +1,10 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: natss-client
+spec:
+  template:
+    spec:
+      containers:
+      - image: gcr.io/rikudog/natss-client:v0
+        imagePullPolicy: Always

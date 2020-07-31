@@ -122,3 +122,9 @@ This will create a broker called `natss-backed-broker`. You can find it by runni
 ```bash
 kubectl get brokers natss-backed-broker
 ```
+
+## NATS BOX
+
+```bash
+kubectl run -i --rm --tty nats-box --image=synadia/nats-box --restart=Never
+```

@@ -121,7 +121,9 @@ kubectl apply --selector knative.dev/crd-install=true \
 --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-crds.yaml 
 
 kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-core.yaml \
---filename https://github.com/knative/eventing/releases/download/v0.16.0/in-memory-channel.yaml
+--filename https://github.com/knative/eventing/releases/download/v0.16.0/in-memory-channel.yaml \
+--filename https://github.com/knative/eventing/releases/download/v0.16.0/mt-channel-broker.yaml
+
 
 
 # Install Advanced Monitoring

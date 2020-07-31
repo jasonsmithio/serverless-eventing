@@ -4,7 +4,7 @@ metadata:
   name: natss-service-trigger
   namespace: default
 spec:
-  broker: natss-test-channel
+  broker: natss-backed-broker
   filter:
     attributes:
       type: dev.knative.channel.natss

@@ -1,7 +1,7 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: my-service
+  name: test-service
   namespace: default
 spec:
   template:
