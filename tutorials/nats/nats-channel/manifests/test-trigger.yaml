@@ -1,0 +1,15 @@
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: natss-service-trigger
+  namespace: default
+spec:
+  broker: natss-test-channel
+  filter:
+    attributes:
+      type: dev.knative.channel.natss
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: test-service

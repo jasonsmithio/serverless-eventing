@@ -50,14 +50,13 @@ sh scripts/setup-cloudrun.sh
 
 Alright, we are ready to get started.
 
-<!--## Install Ko
+## Install Ko
 
 [Ko](https://github.com/google/ko, "Ko") is an open source tool that builds and deploys Go applications to Kubernetes. We will use it to help setup NATS Streaming as our Eventing Bus. Installing Ko is simple. Make sure that you have [Go](https://golang.org/, "Go") setup on your machine and run this line.
 
 ```bash
 GO111MODULE=on go get github.com/google/ko/cmd/ko
 ```
--->
 
 ## Setup NATS Streaming Server
 
@@ -76,15 +75,20 @@ cd tutorials/nats/nats-channel/
 
 Let's now setup our NATS Channel. All of our Kubernetes Application YAML files are located in the `config/` directory.
 
+<!--
 ```bash
 kubectl apply -f config/
 ```
-
-<!--
-```bash
-ko apply -f config/
-```
 -->
+
+```bash
+mkdir -p build/src/knative.dev
+cd build/src/knative.dev
+git clone git@github.com:knative/eventing-contrib.git
+cd eventing-contrib
+ko apply -f natss/config
+cd ../../..
+```
 
 Now let's install our NATS Channel called "nats-test-channel"
 
@@ -105,3 +109,16 @@ kubectl get deployment -n knative-eventing natss-ch-dispatcher
 ```
 
 By default the components are configured to connect to NATS at `nats://nats-streaming.natss.svc:4222` with NATS Streaming cluster ID `knative-nats-streaming`.
+
+Now we will install an [Eventing Broker](https://knative.dev/development/eventing/broker/, "Eventing Broker"). A Broker represents an ‘event mesh’. Events are sent to the Broker's ingress and are then sent to any subscribers that are interested in that event. Once inside a Broker, all metadata other than the CloudEvent is stripped away (e.g. unless set as a CloudEvent attribute, there is no concept of how this event entered the Broker).
+
+```bash
+kubectl apply -f manifests/natss-channel-configmap.yaml
+kubectl apply -f manifests/natss-broker.yaml
+```
+
+This will create a broker called `natss-backed-broker`. You can find it by running this command.
+
+```bash
+kubectl get brokers natss-backed-broker
+```

@@ -7,3 +7,4 @@ twitter-svc.yaml
 *.pem
 staging
 nats-source/
+build/
