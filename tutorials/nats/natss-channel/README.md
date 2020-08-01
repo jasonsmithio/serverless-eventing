@@ -219,8 +219,8 @@ We first create an AlphaVantage object using our key called `afx`. The `make_msg
 Now lets build the containers and push them to [Google Container Registry](https://cloud.google.com/container-registry "Google Container Registry").
 
 ```bash
-docker build --build-arg PROJECT_ID=${PROJECT_ID} -t gcr.io/${PROJECT_ID}/currency-natss:v1  .
-docker push gcr.io/${PROJECT_ID}/currency-natss:v1
+docker build --build-arg PROJECT_ID=${PROJECT_ID} -t gcr.io/${PROJECT_ID}/natss-currency:v1  .
+docker push gcr.io/${PROJECT_ID}/natss-currency:v1
 ```
 
 Now we will build our `natss-client`. This application will receive the financial messages and send them to the NATS Streaming Server.

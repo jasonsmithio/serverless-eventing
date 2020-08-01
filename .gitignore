@@ -9,3 +9,5 @@ twitter-svc.yaml
 staging
 nats-source/
 build/
+natss-client-use.yaml
+natss-currency-use.yaml

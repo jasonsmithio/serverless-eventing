@@ -6,5 +6,5 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/PROJECT_ID/nats-currency:v1
+      - image: gcr.io/PROJECT_ID/natss-currency:v1
         imagePullPolicy: Always

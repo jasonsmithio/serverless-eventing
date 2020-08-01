@@ -1,7 +1,7 @@
 apiVersion: sources.knative.dev/v1alpha2
 kind: SinkBinding
 metadata:
-  name: natss-sink-bind
+  name: natss-currency-sink-bind
 spec:
   subject:
     apiVersion: serving.knative.dev/v1

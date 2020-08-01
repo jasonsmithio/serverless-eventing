@@ -6,5 +6,5 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/PROJECT_ID/natss-client:v0
+      - image: gcr.io/PROJECT_ID/natss-client:v1
         imagePullPolicy: Always
