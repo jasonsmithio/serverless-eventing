@@ -18,53 +18,11 @@ from nats.aio.errors import ErrConnectionClosed, ErrTimeout, ErrNoServers
 
 app = Flask(__name__)
 
-# Async with NATS Streaming
-async def run(loop):
-    nc = NATS()
-    sc = STAN()
-    await nc.connect("nats://nats-streaming.natss.svc:4222", loop=loop)
-    #await sc.connect("nats://nats-streaming.natss.svc:4222", "client-123", nats=nc)
-    await sc.connect("knative-nats-streaming", "testing", nats=nc)
-
-    async def ack_handler(ack):
-        print("Received ack: {}".format(ack.guid))
-
-    # Publish asynchronously by using an ack_handler which
-    # will be passed the status of the publish.
-    for i in range(0, 1024):
-        await sc.publish("foo", b'hello-world', ack_handler=ack_handler)
-
-    async def cb(msg):
-        print("Received a message on subscription (seq: {}): {}".format(msg.sequence, msg.data))
-
-    await sc.subscribe("foo", start_at='first', cb=cb)
-    await asyncio.sleep(1, loop=loop)
-
-    await sc.close()
-    await nc.close()
-
 
 ## Logger
 
 def info(msg):
     app.logger.info(msg)
-
-
-
-## NATS example
-
-async def example():
-
-   # [begin publish_json]
-   nc = NATS()
-
-   await nc.connect(servers=["nats://nats-streaming.natss.svc:4222"])
-
-   await nc.publish("foo", json.dumps({"symbol": "GOOG", "price": 1200 }).encode())
-
-   # [end publish_json]
-
-   await nc.close()
 
 
 ## App Route
@@ -75,26 +33,45 @@ def default_route():
         content = request.data.decode('utf-8')
         info(f'Event Display received event: {content}')
 
+###
+        # Async with NATS Streaming
+
+        async def run(loop):
+            nc = NATS()
+            sc = STAN()
+
+            await nc.connect("nats://nats-streaming.natss.svc:4222", loop=loop)
+            await sc.connect("knative-nats-streaming", "testing-0", nats=nc)
+
+            async def ack_handler(ack):
+                print("Received ack: {}".format(ack.guid))
+
+            # Publish asynchronously by using an ack_handler which
+            # will be passed the status of the publish.
+            
+            await sc.publish("foo", json.dumps({"forexrate": content }).encode(), ack_handler=ack_handler)
+            async def cb(msg):
+                print("Received a message on subscription (seq: {}): {}".format(msg.sequence, msg.data))
+
+            await sc.subscribe("foo", start_at='first', cb=cb)
+            await asyncio.sleep(1, loop=loop)
+
+            await sc.close()
+            await nc.close()
+
+#####
+
         loop = asyncio.get_event_loop()
-        #loop.run_until_complete(example())
         loop.run_until_complete(run(loop))
-        loop.close()
+        #loop.run_until_complete(run(Eventing(content)))
+        #loop.close()
 
         return jsonify(hello=str(content))
     else:
         return jsonify('No Data')
 
 
-
-#if __name__ == '__main__':
-#    loop = asyncio.get_event_loop()
-#    loop.run_until_complete(run(loop))
-#    loop.close()
-
-
-
-
-## Rnu Flask
+## Run Flask
 
 if __name__ != '__main__':
     # Redirect Flask logs to Gunicorn logs
