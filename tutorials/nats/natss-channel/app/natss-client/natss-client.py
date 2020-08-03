@@ -13,6 +13,7 @@ from pynats import NATSClient
 
 import asyncio
 from nats.aio.client import Client as NATS
+from stan.aio.client import Client as STAN
 from nats.aio.errors import ErrConnectionClosed, ErrTimeout, ErrNoServers
 
 app = Flask(__name__)
@@ -20,56 +21,50 @@ app = Flask(__name__)
 # Async with NATS Streaming
 async def run(loop):
     nc = NATS()
-
+    sc = STAN()
     await nc.connect("nats://nats-streaming.natss.svc:4222", loop=loop)
+    #await sc.connect("nats://nats-streaming.natss.svc:4222", "client-123", nats=nc)
+    await sc.connect("knative-nats-streaming", "testing", nats=nc)
 
-    async def message_handler(msg):
-        subject = msg.subject
-        reply = msg.reply
-        data = msg.data.decode()
-        print("Received a message on '{subject} {reply}': {data}".format(
-            subject=subject, reply=reply, data=data))
+    async def ack_handler(ack):
+        print("Received ack: {}".format(ack.guid))
 
-    # Simple publisher and async subscriber via coroutine.
-    sid = await nc.subscribe("foo", cb=message_handler)
+    # Publish asynchronously by using an ack_handler which
+    # will be passed the status of the publish.
+    for i in range(0, 1024):
+        await sc.publish("foo", b'hello-world', ack_handler=ack_handler)
 
-    # Stop receiving after 2 messages.
-    await nc.auto_unsubscribe(sid, 2)
-    await nc.publish("foo", b'Hello')
-    await nc.publish("foo", b'World')
-    await nc.publish("foo", b'!!!!!')
+    async def cb(msg):
+        print("Received a message on subscription (seq: {}): {}".format(msg.sequence, msg.data))
 
-    async def help_request(msg):
-        subject = msg.subject
-        reply = msg.reply
-        data = msg.data.decode()
-        print("Received a message on '{subject} {reply}': {data}".format(
-            subject=subject, reply=reply, data=data))
-        await nc.publish(reply, b'I can help')
+    await sc.subscribe("foo", start_at='first', cb=cb)
+    await asyncio.sleep(1, loop=loop)
 
-    # Use queue named 'workers' for distributing requests
-    # among subscribers.
-    sid = await nc.subscribe("help", "workers", help_request)
-
-    # Send a request and expect a single response
-    # and trigger timeout if not faster than 1 second.
-    try:
-        response = await nc.request("help", b'help me', timeout=1)
-        print("Received response: {message}".format(
-            message=response.data.decode()))
-    except ErrTimeout:
-        print("Request timed out")
-
-    # Remove interest in subscription.
-    await nc.unsubscribe(sid)
-
-    # Terminate connection to NATS.
+    await sc.close()
     await nc.close()
+
 
 ## Logger
 
 def info(msg):
     app.logger.info(msg)
+
+
+
+## NATS example
+
+async def example():
+
+   # [begin publish_json]
+   nc = NATS()
+
+   await nc.connect(servers=["nats://nats-streaming.natss.svc:4222"])
+
+   await nc.publish("foo", json.dumps({"symbol": "GOOG", "price": 1200 }).encode())
+
+   # [end publish_json]
+
+   await nc.close()
 
 
 ## App Route
@@ -81,6 +76,7 @@ def default_route():
         info(f'Event Display received event: {content}')
 
         loop = asyncio.get_event_loop()
+        #loop.run_until_complete(example())
         loop.run_until_complete(run(loop))
         loop.close()
 

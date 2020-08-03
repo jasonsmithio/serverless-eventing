@@ -139,7 +139,7 @@ Open a second terminal tab and we will use this command to create a new NATS Box
 kubectl run -i --rm --tty nats-box-sub --image=synadia/nats-box --restart=Never
 ```
 
-Run the below command to consume from the "hello" subject. 
+Run the below command to consume from the "hello" subject.
 
 ```bash
 stan-sub -s nats://nats-streaming.natss.svc:4222 -c knative-nats-streaming hello
