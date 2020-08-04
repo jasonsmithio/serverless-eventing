@@ -1,4 +1,6 @@
 apiVersion: messaging.knative.dev/v1alpha1
 kind: NatssChannel
 metadata:
-  name: natss-test-channel
+  name: natss-channel
+spec:
+  NatssChannelSpec: subscribable

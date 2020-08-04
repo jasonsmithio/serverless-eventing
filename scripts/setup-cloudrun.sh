@@ -105,6 +105,14 @@ kubectl create clusterrolebinding cluster-admin-binding \
 --clusterrole=cluster-admin \
 --user=$(gcloud config get-value core/account)
 
+###ISTIO?  https://github.com/knative/serving/blob/master/DEVELOPMENT.md#deploy-istio
+#kubectl apply -f https://raw.githubusercontent.com/knative/serving/master/third_party/istio-1.5.7/istio-crds.yaml
+#kubectl apply -f https://raw.githubusercontent.com/knative/serving/master/third_party/istio-1.5.7/istio-minimal.yaml
+
+# cluster local gateway
+# kubectl get service cluster-local-gateway -n istio-system
+kubectl apply -f https://raw.githubusercontent.com/knative/serving/master/third_party/istio-1.4.9/istio-knative-extras.yaml
+
 ##### Get istio-gateway external IP
 echo "****** We are going to grab the external IP ******"
 export EXTERNAL_IP=$(kubectl get service istio-ingress --namespace gke-system | awk 'FNR == 2 {print $4}')
@@ -118,20 +126,33 @@ kubectl patch configmap config-domain --namespace knative-serving --patch \
 ## Install Knative Eventing
 ## https://knative.dev/docs/install/any-kubernetes-cluster/#installing-the-eventing-component
 
+
 echo "Install Knative Eventing"
 kubectl apply --selector knative.dev/crd-install=true \
 --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-crds.yaml 
 
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-core.yaml \
---filename https://github.com/knative/eventing/releases/download/v0.16.0/in-memory-channel.yaml \
---filename https://github.com/knative/eventing/releases/download/v0.16.0/mt-channel-broker.yaml
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-core.yaml
 
+#install Channels
+
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/mt-channel-broker.yaml \
+--filename https://github.com/knative/eventing-contrib/releases/download/v0.16.0/natss-channel.yaml \
+--filename https://github.com/knative/eventing/releases/download/v0.16.0/in-memory-channel.yaml
+
+
+
+# Kubectl Natss Namespace
+kubectl create namespace natss-knative
 
 
 # Install Advanced Monitoring
 kubectl apply --filename https://github.com/knative/serving/releases/download/v0.16.0/monitoring-core.yaml \
 --filename https://github.com/knative/serving/releases/download/v0.16.0/monitoring-metrics-prometheus.yaml \
 --filename hhttps://github.com/knative/serving/releases/download/v0.16.0/monitoring-tracing-jaeger-in-mem.yaml
+
+# Setup Broker
+kubectl label namespace default knative-eventing-injection=enabled
+
 
 # Enable Secret Admin to compute service account
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$PROJ_NUMBER-compute@developer.gserviceaccount.com --role roles/secretmanager.admin

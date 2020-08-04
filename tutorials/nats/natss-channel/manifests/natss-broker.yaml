@@ -9,5 +9,5 @@ spec:
   config:
     apiVersion: v1
     kind: ConfigMap
-    name: natss-channel
+    name: natss-channel-config
     namespace: knative-eventing

@@ -5,11 +5,8 @@ metadata:
   namespace: default
 spec:
   broker: natss-backed-broker
-  filter:
-    attributes:
-      type: dev.knative.channel.natss
   subscriber:
     ref:
-      apiVersion: serving.knative.dev/v1
+      apiVersion: v1
       kind: Service
-      name: natss-viewer
+      name: event-viewer

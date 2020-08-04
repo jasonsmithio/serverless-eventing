@@ -2,11 +2,10 @@ apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: natss-viewer
-  namespace: default
 spec:
   template:
     spec:
       containers:
       -  # This corresponds to
          # https://github.com/knative/eventing-contrib/tree/master/cmd/event_display
-         image: gcr.io/knative-releases/knative.dev/eventing-contrib/cmd/event_display
+         image: gcr.io/rikudog/event-viewer:v1

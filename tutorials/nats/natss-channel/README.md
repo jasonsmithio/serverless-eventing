@@ -272,6 +272,26 @@ All of our services are deployed so let's move on.
 
 ## Testing Time
 
+Remember how we used NATS Box to view events? Let's try this again. 
+
+```bash
+kubectl run -i --rm --tty nats-box-sub-1 --image=synadia/nats-box --restart=Never
+```
+
+Now we will publish an event to the "hello" subject. The message will be "test".
+
+```bash
+stan-sub -s nats://nats-streaming.natss.svc:4222 -c knative-nats-streaming -id newclient foo
+```
+
+You should see something like this:
+
+```bash
+[#1063] Received: sequence:1063 subject:"foo" data:"{\"forexrate\": \"\\\"105.96900000\\\"\"}" timestamp:1596491531813036981
+```
+
+You should notice the foreign exchange rate as the value of "forexrate".
+
 ```bash
 kubectl apply -f natss-viewer.yaml
 ```
