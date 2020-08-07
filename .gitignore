@@ -7,7 +7,7 @@ twitter-sink.yaml
 twitter-svc.yaml
 *.pem
 
-build/
+build/src/
 nats-source/
 
 

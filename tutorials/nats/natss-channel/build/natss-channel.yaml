@@ -1,0 +1,526 @@
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: natss-addressable-resolver
+  labels:
+    contrib.eventing.knative.dev/release: "v0.16.0"
+    duck.knative.dev/addressable: "true"
+# Do not use this role directly. These rules will be added to the "addressable-resolver" role.
+rules:
+- apiGroups:
+  - messaging.knative.dev
+  resources:
+  - natsschannels
+  - natsschannels/status
+  verbs:
+  - get
+  - list
+  - watch
+
+---
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: natss-channelable-manipulator
+  labels:
+    contrib.eventing.knative.dev/release: "v0.16.0"
+    duck.knative.dev/channelable: "true"
+# Do not use this role directly. These rules will be added to the "channelable-manipulator" role.
+rules:
+- apiGroups:
+  - messaging.knative.dev
+  resources:
+  - natsschannels
+  - natsschannels/status
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+
+---
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: natss-ch-controller
+  labels:
+    contrib.eventing.knative.dev/release: "v0.16.0"
+rules:
+- apiGroups:
+  - messaging.knative.dev
+  resources:
+  - natsschannels
+  - natsschannels/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+- apiGroups:
+  - messaging.knative.dev
+  resources:
+  - natsschannels/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - "" # Core API group.
+  resources:
+  - services
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+- apiGroups:
+  - "" # Core API group.
+  resources:
+  - services
+  verbs:
+  - update
+- apiGroups:
+  - "" # Core API Group.
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "" # Core API group.
+  resources:
+  - endpoints
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - deployments/status
+  verbs:
+  - get
+  - list
+  - watch
+
+---
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: natss-ch-dispatcher
+rules:
+- apiGroups:
+  - messaging.knative.dev
+  resources:
+  - natsschannels
+  - natsschannels/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+- apiGroups:
+  - messaging.knative.dev
+  resources:
+  - natsschannels/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - "" # Core API group.
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+
+---
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: natss-ch-dispatcher
+  namespace: knative-eventing
+  labels:
+    contrib.eventing.knative.dev/release: "v0.16.0"
+    messaging.knative.dev/channel: natss-channel
+    messaging.knative.dev/role: dispatcher
+spec:
+  selector:
+    messaging.knative.dev/channel: natss-channel
+    messaging.knative.dev/role: dispatcher
+  ports:
+  - name: http-dispatcher
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+
+---
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: natss-ch-controller
+  namespace: knative-eventing
+  labels:
+    contrib.eventing.knative.dev/release: "v0.16.0"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: natss-ch-dispatcher
+  namespace: knative-eventing
+  labels:
+    contrib.eventing.knative.dev/release: "v0.16.0"
+
+---
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: natss-ch-controller
+  labels:
+    contrib.eventing.knative.dev/release: "v0.16.0"
+subjects:
+- kind: ServiceAccount
+  name: natss-ch-controller
+  namespace: knative-eventing
+roleRef:
+  kind: ClusterRole
+  name: natss-ch-controller
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: natss-ch-dispatcher
+subjects:
+- kind: ServiceAccount
+  name: natss-ch-dispatcher
+  namespace: knative-eventing
+roleRef:
+  kind: ClusterRole
+  name: natss-ch-dispatcher
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: natsschannels.messaging.knative.dev
+  labels:
+    contrib.eventing.knative.dev/release: "v0.16.0"
+    knative.dev/crd-install: "true"
+    messaging.knative.dev/subscribable: "true"
+    duck.knative.dev/addressable: "true"
+spec:
+  group: messaging.knative.dev
+  version: v1alpha1
+  names:
+    kind: NatssChannel
+    plural: natsschannels
+    singular: natsschannel
+    categories:
+    - all
+    - knative
+    - messaging
+    - channel
+    shortNames:
+    - natssc
+  scope: Namespaced
+  subresources:
+    status: {}
+  additionalPrinterColumns:
+  - name: Ready
+    type: string
+    JSONPath: ".status.conditions[?(@.type==\"Ready\")].status"
+  - name: Reason
+    type: string
+    JSONPath: ".status.conditions[?(@.type==\"Ready\")].reason"
+  - name: URL
+    type: string
+    JSONPath: .status.address.url
+  - name: Age
+    type: date
+    JSONPath: .metadata.creationTimestamp
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            subscribable:
+              type: object
+              properties:
+                subscribers:
+                  type: array
+                  description: "The list of subscribers that have expressed interest
+                    in receiving events from this channel."
+                  items:
+                    required:
+                    - uid
+                    properties:
+                      ref:
+                        type: object
+                        required:
+                        - namespace
+                        - name
+                        - uid
+                        properties:
+                          apiVersion:
+                            type: string
+                          kind:
+                            type: string
+                          name:
+                            type: string
+                            minLength: 1
+                          namespace:
+                            type: string
+                            minLength: 1
+                          uid:
+                            type: string
+                            minLength: 1
+                      uid:
+                        type: string
+                        minLength: 1
+                      subscriberURI:
+                        type: string
+                        minLength: 1
+                      replyURI:
+                        type: string
+                        minLength: 1
+
+---
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: natss-ch-controller
+  namespace: knative-eventing
+  labels:
+    contrib.eventing.knative.dev/release: "v0.16.0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      messaging.knative.dev/channel: natss-channel
+      messaging.knative.dev/role: controller
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      serviceAccountName: natss-ch-controller
+      containers:
+      - name: controller
+        image: gcr.io/knative-releases/knative.dev/eventing-contrib/natss/cmd/channel_controller@sha256:360eb9939b7ac4a1c6973b7ccd7fd06d6d5f201ccfe4e1a71282f71ac6ee0c79
+        env:
+        - name: CONFIG_LOGGING_NAME
+          value: config-logging
+        - name: METRICS_DOMAIN
+          value: knative.dev/eventing
+        - name: SYSTEM_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - containerPort: 9090
+          name: metrics
+        volumeMounts:
+        - name: config-logging
+          mountPath: /etc/config-logging
+      volumes:
+      - name: config-logging
+        configMap:
+          name: config-logging
+
+---
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: natss-ch-dispatcher
+  namespace: knative-eventing
+  labels:
+    contrib.eventing.knative.dev/release: "v0.16.0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      messaging.knative.dev/channel: natss-channel
+      messaging.knative.dev/role: dispatcher
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      serviceAccountName: natss-ch-dispatcher
+      containers:
+      - name: dispatcher
+        image: gcr.io/knative-releases/knative.dev/eventing-contrib/natss/cmd/channel_dispatcher@sha256:eda2aad3967a42f3e748ce40c245051d310e8ca50fb6a3bcece214133b7ecf5c
+        env:
+        - name: CONFIG_LOGGING_NAME
+          value: config-logging
+        - name: METRICS_DOMAIN
+          value: knative.dev/eventing
+        - name: SYSTEM_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - containerPort: 9090
+          name: metrics
+        volumeMounts:
+        - name: config-logging
+          mountPath: /etc/config-logging
+      volumes:
+      - name: config-logging
+        configMap:
+          name: config-logging
+
+---
