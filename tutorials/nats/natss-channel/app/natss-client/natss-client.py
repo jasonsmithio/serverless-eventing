@@ -49,11 +49,11 @@ def default_route():
             # Publish asynchronously by using an ack_handler which
             # will be passed the status of the publish.
             
-            await sc.publish("foo", json.dumps({"forexrate": content }).encode(), ack_handler=ack_handler)
+            await sc.publish("foo.default", json.dumps({"forexrate": content }).encode(), ack_handler=ack_handler)
             async def cb(msg):
                 print("Received a message on subscription (seq: {}): {}".format(msg.sequence, msg.data))
 
-            await sc.subscribe("foo", start_at='first', cb=cb)
+            await sc.subscribe("foo.default", start_at='first', cb=cb)
             await asyncio.sleep(1, loop=loop)
 
             await sc.close()
