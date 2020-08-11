@@ -1,15 +1,18 @@
 import os
+import io
 import json
 import logging
 import time
 import json
+import requests
 
 
+from cloudevents.sdk import converters
+from cloudevents.sdk import marshaller
+from cloudevents.sdk.converters import structured
+from cloudevents.sdk.event import v1
 
 from flask import Flask, jsonify, redirect, render_template, request, Response
-
-
-from pynats import NATSClient
 
 import asyncio
 from nats.aio.client import Client as NATS
@@ -41,15 +44,16 @@ def default_route():
             sc = STAN()
 
             await nc.connect("nats://nats-streaming.natss.svc:4222", loop=loop)
-            await sc.connect("knative-nats-streaming", "testing-0", nats=nc)
+            await sc.connect("knative-nats-streaming", "testing-1", nats=nc)
 
             async def ack_handler(ack):
                 print("Received ack: {}".format(ack.guid))
 
             # Publish asynchronously by using an ack_handler which
             # will be passed the status of the publish.
-            
-            await sc.publish("foo.default", json.dumps({"forexrate": content }).encode(), ack_handler=ack_handler)
+
+            await sc.publish("foo.default", json.dumps({"specversion": "1.0", "type" : "dev.knative.messaging.natsschannel", "source" : "/apis/messaging.knative.dev/v1alpha1/namespaces/default/natsschannels/foo", "data" : content }).encode(), ack_handler=ack_handler)
+            #await sc.publish("foo.default", event, ack_handler=ack_handler)
             async def cb(msg):
                 print("Received a message on subscription (seq: {}): {}".format(msg.sequence, msg.data))
 

@@ -6,7 +6,7 @@ spec:
   channel:
     apiVersion: messaging.knative.dev/v1alpha1
     kind: NatssChannel
-    name: natss-channel
+    name: foo
   subscriber:
     ref:
       apiVersion: serving.knative.dev/v1
