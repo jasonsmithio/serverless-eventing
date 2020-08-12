@@ -2,15 +2,15 @@
 
 __Corresponding [Blog Post](https://thejaysmith.com/titles/serverlessjay/serverless-eventing:-cloud-native-messaging-with-nats/ "Blog Post")__
 
-[Knative Eventing](https://knative.dev/docs/eventing/) offers a variety of EventSources to use for building a serverless eventing platform. So far, my blog has covered [SinkBinding](https://thejaysmith.com/titles/blogroll/serverless-eventing-sinkbinding-101/) as well as [Kafka](https://thejaysmith.com/titles/serverlessjay/serverless-eventing-modernizing-legacy-streaming-with-kafka/, "Kafka").
+[Knative Eventing](https://knative.dev/docs/eventing/) offers a variety of EventSources to use for building a serverless eventing platform. So far, my blog has covered [SinkBinding](https://thejaysmith.com/titles/blogroll/serverless-eventing-sinkbinding-101/) as well as [Kafka](https://thejaysmith.com/titles/serverlessjay/serverless-eventing-modernizing-legacy-streaming-with-kafka/ "Kafka").
 
-This tutorial will show you how to use [NATS](https://nats.io/) as a Knative Eventing source. NATS is a relatively new offering compared to other messaging busses such as [RabbitMQ](https://rabbitmq.com, "RabbitMQ") or [Apache Kafka](https://kafka.apache.org, "Apache Kafka") but it was designed for the purpose of supporting messaging in a Cloud Native environment. It is even a [CNCF](https://cncf.io, "CNCF") Incubating Project.
+This tutorial will show you how to use [NATS](https://nats.io/) as a Knative Eventing source. NATS is a relatively new offering compared to other messaging busses such as [RabbitMQ](https://rabbitmq.com "RabbitMQ") or [Apache Kafka](https://kafka.apache.org "Apache Kafka") but it was designed for the purpose of supporting messaging in a Cloud Native environment. It is even a [CNCF](https://cncf.io "CNCF") Incubating Project.
 
 ## Concepts
 
-For the purposes of this demo, we will also introduce the concept of the [Eventing Channel](https://knative.dev/docs/eventing/channels/default-channels/, "Eventing Channel"). Channels are [Kubernetes Custom Resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/, "Kubernetes Custom Resources") which define a single event forwarding and persistence layer. Messaging implementations may provide implementations of Channels via a Kubernetes Custom Resource, supporting different technologies, such as Apache Kafka or NATS Streaming. A simpler way to think of it is as a delivery mechanism that can fan-out messages to multiple destinations (sinks).
+For the purposes of this demo, we will also introduce the concept of the [Eventing Channel](https://knative.dev/docs/eventing/channels/default-channels/, "Eventing Channel"). Channels are [Kubernetes Custom Resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/ "Kubernetes Custom Resources") which define a single event forwarding and persistence layer. Messaging implementations may provide implementations of Channels via a Kubernetes Custom Resource, supporting different technologies, such as Apache Kafka or NATS Streaming. A simpler way to think of it is as a delivery mechanism that can fan-out messages to multiple destinations (sinks).
 
-We will be using the [NATS Streaming Server](https://docs.nats.io/nats-streaming-concepts/intro, "NATS Streaming Server") for our channel. It is NATS Server designed specifically for streaming data. This is the perfect NATS component for Serverless Eventing.
+We will be using the [NATS Streaming Server](https://docs.nats.io/nats-streaming-concepts/intro "NATS Streaming Server") for our channel. It is NATS Server designed specifically for streaming data. This is the perfect NATS component for Serverless Eventing.
 
 ## Scenario
 
@@ -54,7 +54,7 @@ Alright, we are ready to get started.
 
 ## Install Ko
 
-[Ko](https://github.com/google/ko, "Ko") is an open source tool that builds and deploys Go applications to Kubernetes. We will use it to help setup NATS Streaming as our Eventing Bus. Installing Ko is simple. Make sure that you have [Go](https://golang.org/, "Go") setup on your machine and run this line.
+[Ko](https://github.com/google/ko "Ko") is an open source tool that builds and deploys Go applications to Kubernetes. We will use it to help setup NATS Streaming as our Eventing Bus. Installing Ko is simple. Make sure that you have [Go](https://golang.org/ "Go") setup on your machine and run this line.
 
 ```bash
 GO111MODULE=on go get github.com/google/ko/cmd/ko
@@ -62,7 +62,7 @@ GO111MODULE=on go get github.com/google/ko/cmd/ko
 
 ## Setup NATS Streaming Server
 
-Now it is time to setup NATS. Let's install the NATS Streaming Server first. We will be using the [Eventing Channel](https://github.com/knative/eventing-contrib/blob/release-0.16/natss/config/README.md, "Eventing Channel") created by our KNative Community. In future examples, we will create and configure our own server but there is no point in reinventing the wheel when not needed. So let's create a namespace for our NATS Server intallation and install the server.
+Now it is time to setup NATS. Let's install the NATS Streaming Server first. We will be using the [Eventing Channel](https://github.com/knative/eventing-contrib/blob/release-0.16/natss/config/README.md "Eventing Channel") created by our KNative Community. In future examples, we will create and configure our own server but there is no point in reinventing the wheel when not needed. So let's create a namespace for our NATS Server intallation and install the server.
 
 ```bash
 kubectl create namespace natss
@@ -125,7 +125,7 @@ kubectl get brokers natss-backed-broker
 
 ## NATS BOX
 
-After setting up NATS Streaming, it's nice to be able to test on cluster. This is especially important if all of the operations are expected to run on cluster. You wouldn't necessarily wnat to expose the services to the larger internet. The NATS team has provided us with a handy tool called [NATS Box](https://github.com/nats-io/nats-box, "NATS Box"). You deploy the a container in a pod in Kubernetes and test as if you were a service on the same cluter.
+After setting up NATS Streaming, it's nice to be able to test on cluster. This is especially important if all of the operations are expected to run on cluster. You wouldn't necessarily wnat to expose the services to the larger internet. The NATS team has provided us with a handy tool called [NATS Box](https://github.com/nats-io/nats-box "NATS Box"). You deploy the a container in a pod in Kubernetes and test as if you were a service on the same cluter.
 
 Open a new tab in your terminal and run the below command to enter the NATS Box for publishing.
 
@@ -222,7 +222,7 @@ while True:
 
 We first create an AlphaVantage object using our key called `afx`. The `make_msg` function formats the function. The `def_currency` function will use CURR1 and CURR2 and return an exchange rate. The while loop will execute the `def_currency` function, get the exchange rate, and send it to our event sink every 30 seconds. You could make it more or less but I chose '30' as it will give you more time to play with it during the 500 calls/day limit.
 
-Now lets build the containers and push them to [Google Container Registry](https://cloud.google.com/container-registry, "Google Container Registry").
+Now lets build the containers and push them to [Google Container Registry](https://cloud.google.com/container-registry "Google Container Registry").
 
 ```bash
 docker build --build-arg PROJECT_ID=${PROJECT_ID} -t gcr.io/${PROJECT_ID}/natss-currency:v1  .
@@ -246,7 +246,7 @@ from nats.aio.errors import ErrConnectionClosed, ErrTimeout, ErrNoServers
 
 Here we are importing some important libraries. We are going to be using this asynchronously so the `asyncio` library is important as a dependency for the NATS python libraries. We are using [asyncio-nats-client](https://pypi.org/project/asyncio-nats-client/) and [asyncio-nats-streaming](https://pypi.org/project/asyncio-nats-streaming/) to connect to the NATS Streaming Server and send streaming data.
 
-We will be using [Flask](https://flask.palletsprojects.com/en/1.1.x/, "Flask") to handle the POST requests coming from our `natss-currency` application.
+We will be using [Flask](https://flask.palletsprojects.com/en/1.1.x/ "Flask") to handle the POST requests coming from our `natss-currency` application.
 
 ```bash
         async def run(loop):
