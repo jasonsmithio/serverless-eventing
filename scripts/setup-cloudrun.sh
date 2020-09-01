@@ -42,10 +42,15 @@ cd $MYROOT
 clear
 echo "******Setting Variables******"
 
+if [ -z "$CLUSTER_NAME" ]
+then
+    export CLUSTER_NAME='cr-knative'
+fi
+
 export ZONE='us-central1-a'
 export PROJECT_ID=$(gcloud config get-value project)
 export PROJ_NUMBER=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(PROJECT_NUMBER)")
-export CLUSTER_NAME='cr-knative'
+#export CLUSTER_NAME='cr-knative'
 export KO_DOCKER_REPO='gcr.io/'${PROJECT_ID}
 
 ### Setup Basic Environment
@@ -131,13 +136,13 @@ echo "Install Knative Eventing"
 kubectl apply --selector knative.dev/crd-install=true \
 --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-crds.yaml 
 
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-core.yaml
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.17.0/eventing-core.yaml
 
 #install Channels
 
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/mt-channel-broker.yaml \
---filename https://github.com/knative/eventing-contrib/releases/download/v0.16.0/natss-channel.yaml \
---filename https://github.com/knative/eventing/releases/download/v0.16.0/in-memory-channel.yaml
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.17.0/mt-channel-broker.yaml \
+--filename https://github.com/knative/eventing-contrib/releases/download/v0.17.0/natss-channel.yaml \
+--filename https://github.com/knative/eventing/releases/download/v0.17.0/in-memory-channel.yaml
 
 
 
@@ -146,9 +151,9 @@ kubectl create namespace natss-knative
 
 
 # Install Advanced Monitoring
-kubectl apply --filename https://github.com/knative/serving/releases/download/v0.16.0/monitoring-core.yaml \
---filename https://github.com/knative/serving/releases/download/v0.16.0/monitoring-metrics-prometheus.yaml \
---filename hhttps://github.com/knative/serving/releases/download/v0.16.0/monitoring-tracing-jaeger-in-mem.yaml
+kubectl apply --filename https://github.com/knative/serving/releases/download/v0.17.0/monitoring-core.yaml \
+--filename https://github.com/knative/serving/releases/download/v0.17.0/monitoring-metrics-prometheus.yaml \
+--filename hhttps://github.com/knative/serving/releases/download/v0.17.0/monitoring-tracing-jaeger-in-mem.yaml
 
 # Setup Broker
 kubectl label namespace default knative-eventing-injection=enabled
