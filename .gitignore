@@ -14,9 +14,5 @@ nats-source/
 natss-client-use.yaml
 natss-currency-use.yaml
 
-staging/*
-testing/
-my-examples/
-nats-test/
-app-test/
-trigger-test/
+staging/
+staging/eventing-contrib

@@ -1,0 +1,14 @@
+apiVersion: messaging.knative.dev/v1
+kind: Subscription
+metadata:
+  name: pubsub-currency
+spec:
+  channel:
+    apiVersion: messaging.cloud.google.com/v1beta1
+    kind: Channel
+    name: currency-pubsub
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: pubsub-viewer
