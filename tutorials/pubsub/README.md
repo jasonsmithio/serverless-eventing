@@ -85,6 +85,12 @@ There is no need to provision a broker or install an operator on cluster. Of cou
 
 This is why we show a bunch of methods for using serverless eventing rather than push one product or another. It's best to find a tool that suits your project needs and developer culture.
 
+One last thing, we need to install the PubSub Channel component for Knative Eventing.
+
+```bash
+kubectl apply --filename https://github.com/google/knative-gcp/releases/download/v0.17.0/cloud-run-events.yaml
+```
+
 ## Building our Applications
 
 Let's now build our application. First, let's make sure that `gcloud` will be properly authenitcated with the `docker` command. If you do not have Docker installed, you can find it [here](https://docs.docker.com/get-docker/ "here").

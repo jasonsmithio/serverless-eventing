@@ -69,6 +69,13 @@ kubectl create namespace natss
 kubectl apply --filename tutorials/nats/natss-channel/build/natss.yaml
 ```
 
+Next, let's install some Knative components for NATS Streaming Server
+
+```bash
+kubectl create namespace natss-knative
+kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/v0.17.0/natss-channel.yaml
+```
+
 Let's now setup our NATS Channel. All of our Kubernetes Application YAML files are located in the `config/` directory.
 
 ```bash

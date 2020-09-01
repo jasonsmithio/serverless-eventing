@@ -95,7 +95,7 @@ gcloud beta container clusters create $CLUSTER_NAME \
 #	--cluster-version=1.15.7-gke.2 \
 
 #wait for 90 seconds
-echo "***** Waiting for 90 second for cluster to complete *****"
+echo "***** Waiting for 90 seconds for cluster to complete *****"
 sleep 90
 
 # Configure Cloud Run with Cluster
@@ -116,7 +116,13 @@ kubectl create clusterrolebinding cluster-admin-binding \
 
 # cluster local gateway
 # kubectl get service cluster-local-gateway -n istio-system
-kubectl apply -f https://raw.githubusercontent.com/knative/serving/master/third_party/istio-1.4.9/istio-knative-extras.yaml
+
+# Istio for 0.16
+# kubectl apply -f https://raw.githubusercontent.com/knative/serving/master/third_party/istio-1.4.9/istio-knative-extras.yaml
+
+# Istio for 0.17
+kubectl apply --filename https://github.com/knative/net-istio/releases/download/v0.17.0/release.yaml
+
 
 ##### Get istio-gateway external IP
 echo "****** We are going to grab the external IP ******"
@@ -133,27 +139,26 @@ kubectl patch configmap config-domain --namespace knative-serving --patch \
 
 
 echo "Install Knative Eventing"
-kubectl apply --selector knative.dev/crd-install=true \
---filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-crds.yaml 
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.17.0/eventing-crds.yaml
+
+echo "***** Waiting for 45 seconds for Knative Eventing CRDs to Install  *****"
+sleep 45
 
 kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.17.0/eventing-core.yaml
+
+echo "***** Waiting for 30 seconds for Knative Eventing Core to Install  *****"
+sleep 30
 
 #install Channels
 
 kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.17.0/mt-channel-broker.yaml \
---filename https://github.com/knative/eventing-contrib/releases/download/v0.17.0/natss-channel.yaml \
 --filename https://github.com/knative/eventing/releases/download/v0.17.0/in-memory-channel.yaml
 
 
 
-# Kubectl Natss Namespace
-kubectl create namespace natss-knative
-
-
 # Install Advanced Monitoring
-kubectl apply --filename https://github.com/knative/serving/releases/download/v0.17.0/monitoring-core.yaml \
---filename https://github.com/knative/serving/releases/download/v0.17.0/monitoring-metrics-prometheus.yaml \
---filename hhttps://github.com/knative/serving/releases/download/v0.17.0/monitoring-tracing-jaeger-in-mem.yaml
+#kubectl apply --filename https://github.com/knative/serving/releases/download/v0.17.0/monitoring-core.yaml \
+#--filename https://github.com/knative/serving/releases/download/v0.17.0/monitoring-metrics-prometheus.yaml
 
 # Setup Broker
 kubectl label namespace default knative-eventing-injection=enabled
