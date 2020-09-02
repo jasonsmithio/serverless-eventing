@@ -50,7 +50,6 @@ fi
 export ZONE='us-central1-a'
 export PROJECT_ID=$(gcloud config get-value project)
 export PROJ_NUMBER=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(PROJECT_NUMBER)")
-#export CLUSTER_NAME='cr-knative'
 export KO_DOCKER_REPO='gcr.io/'${PROJECT_ID}
 
 ### Setup Basic Environment
@@ -83,16 +82,20 @@ gcloud auth configure-docker
 clear
 echo "******Now we shall create your cluster******"
 gcloud beta container clusters create $CLUSTER_NAME \
---addons HorizontalPodAutoscaling,HttpLoadBalancing,CloudRun  \
+    --addons=HttpLoadBalancing,CloudRun  \
 	--zone=$ZONE \
     --cluster-version=latest \
-    --enable-stackdriver-kubernetes --enable-ip-alias \
+    --enable-stackdriver-kubernetes \
+    --enable-ip-alias \
     --enable-autoscaling --min-nodes=1 --max-nodes=10 \
     --enable-autorepair \
 	--machine-type=n1-standard-4 \
+    --num-nodes=3 \
 	--scopes=cloud-platform 
 
 #	--cluster-version=1.15.7-gke.2 \
+#   --addons=Istio,HttpLoadBalancing,CloudRun  \
+#   --istio-config=auth=MTLS_PERMISSIVE \
 
 #wait for 90 seconds
 echo "***** Waiting for 90 seconds for cluster to complete *****"
@@ -111,8 +114,8 @@ kubectl create clusterrolebinding cluster-admin-binding \
 --user=$(gcloud config get-value core/account)
 
 ###ISTIO?  https://github.com/knative/serving/blob/master/DEVELOPMENT.md#deploy-istio
-#kubectl apply -f https://raw.githubusercontent.com/knative/serving/master/third_party/istio-1.5.7/istio-crds.yaml
-#kubectl apply -f https://raw.githubusercontent.com/knative/serving/master/third_party/istio-1.5.7/istio-minimal.yaml
+# kubectl apply -f https://raw.githubusercontent.com/knative-sandbox/net-istio/master/third_party/istio-1.5.7-helm/istio-crds.yaml
+#kubectl apply -f https://raw.githubusercontent.com/knative-sandbox/net-istio/master/third_party/istio-1.5.7-helm/istio-minimal.yaml
 
 # cluster local gateway
 # kubectl get service cluster-local-gateway -n istio-system
@@ -121,7 +124,8 @@ kubectl create clusterrolebinding cluster-admin-binding \
 # kubectl apply -f https://raw.githubusercontent.com/knative/serving/master/third_party/istio-1.4.9/istio-knative-extras.yaml
 
 # Istio for 0.17
-kubectl apply --filename https://github.com/knative/net-istio/releases/download/v0.17.0/release.yaml
+##kubectl apply --filename https://raw.githubusercontent.com/knative/serving/master/third_party/net-istio.yaml
+#kubectl apply --filename https://github.com/knative/net-istio/releases/download/v0.17.0/release.yaml
 
 
 ##### Get istio-gateway external IP
@@ -139,20 +143,20 @@ kubectl patch configmap config-domain --namespace knative-serving --patch \
 
 
 echo "Install Knative Eventing"
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.17.0/eventing-crds.yaml
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-crds.yaml
 
 echo "***** Waiting for 45 seconds for Knative Eventing CRDs to Install  *****"
 sleep 45
 
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.17.0/eventing-core.yaml
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-core.yaml
 
 echo "***** Waiting for 30 seconds for Knative Eventing Core to Install  *****"
 sleep 30
 
 #install Channels
 
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.17.0/mt-channel-broker.yaml \
---filename https://github.com/knative/eventing/releases/download/v0.17.0/in-memory-channel.yaml
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/mt-channel-broker.yam \
+--filename https://github.com/knative/eventing/releases/download/v0.16.0/in-memory-channel.yaml
 
 
 

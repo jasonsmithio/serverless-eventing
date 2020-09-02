@@ -159,7 +159,7 @@ import cloudevents.exceptions as cloud_exceptions
 from cloudevents.http import from_http
 ```
 
-Here we are importing some important libraries. We are importing the [PubSub Python Library](https://pypi.org/project/google-cloud-pubsub/ "PubSub Python Library") so that we can publish messages to the PubSub topic. We also import a library for [CloudEvents](https://cloudevents.io "CloudEvents"). 
+Here we are importing some important libraries. We are importing the [PubSub Python Library](https://pypi.org/project/google-cloud-pubsub/ "PubSub Python Library") so that we can publish messages to the PubSub topic. We also import a library for [CloudEvents](https://cloudevents.io "CloudEvents").
 
 We will be using [Flask](https://flask.palletsprojects.com/en/1.1.x/ "Flask") to handle the POST requests coming from our `natss-currency` application.
 
