@@ -51,11 +51,24 @@ fi
 
 if [ -z "$CLUSTER_NAME" ]
 then
-    export CLUSTER_NAME='cr-knative'
+    export CLUSTER_NAME='gke-knative'
 fi
 
-export ZONE='us-central1-a'
-export PROJECT_ID=$(gcloud config get-value project)
+if [ -z "$KVERSION" ]
+then
+    export KVERSION='0.17.0'
+fi
+
+if [ -z "$PROJECT_ID" ]
+then
+    export PROJECT_ID=$(gcloud config get-value project)
+fi
+
+if [ -z "$ZONE" ]
+then
+    export ZONE='us-central1-a'
+fi
+
 export PROJ_NUMBER=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(PROJECT_NUMBER)")
 export KO_DOCKER_REPO='gcr.io/'${PROJECT_ID}
 
@@ -97,7 +110,7 @@ gcloud beta container clusters create $CLUSTER_NAME \
     --enable-ip-alias \
     --enable-autoscaling --min-nodes=1 --max-nodes=10 \
     --enable-autorepair \
-	--machine-type=n1-standard-4 \
+	--machine-type=n1-standard-2 \
 	--scopes=cloud-platform 
 
 #	--cluster-version=1.15.7-gke.2 \
@@ -150,6 +163,6 @@ kubectl label namespace default knative-eventing-injection=enabled
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$PROJ_NUMBER-compute@developer.gserviceaccount.com --role roles/secretmanager.admin
 
 
-#Install Tekton
-echo "Installing Tekton"
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+## Install Tekton
+#echo "Installing Tekton"
+#kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml

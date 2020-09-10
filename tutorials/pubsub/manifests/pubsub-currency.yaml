@@ -6,5 +6,5 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/PROJECT_ID/pubsub-currency:v1
+      - image: gcr.io/rikudog/pubsub-currency:v1
         imagePullPolicy: Always

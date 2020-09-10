@@ -13,8 +13,9 @@ nats-source/
 
 natss-client-use.yaml
 natss-currency-use.yaml
+pubsub-client-use.yaml
+pubsub-currency-use.yaml
 
 staging/
 staging/eventing-contrib
 
-demo-stuff.sh
