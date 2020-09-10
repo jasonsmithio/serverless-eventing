@@ -6,5 +6,5 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/rikudog/pubsub-client:v1
+      - image: gcr.io/PROJECT_ID/pubsub-client:v1
         imagePullPolicy: Always
