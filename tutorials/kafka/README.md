@@ -113,7 +113,7 @@ and then we reapply the Helm chart with the added IP address. **PLEASE NOTE** th
 helm upgrade --namespace operator --set global.initContainer.image.tag=5.5.0.0 --set global.provider.region=us-central1 --set global.provider.kubernetes.deployment.zones={us-central1-a}  --set kafka.image.tag=5.5.0.0 --set kafka.replicas=1 --set kafka.enabled=true  --set kafka.loadBalancer.enabled=true --set kafka.loadBalancer.domain=${KAFKA_IP}.xip.io -f cfg/values.yaml kafka ../common/cp/operator/5.5.0/helm/confluent-operator
 ```
 
-## Install Cloud Run for Anthos
+## Install Knative on a GKE Cluster
 
 We will do this on a separate cluster. The purposes is to simulate an environment where your application lives on one cluster and the Kafka brokers are hosted somewhere else. While we use a Kubernetes cluster in this example, it could just as easily be a hosted solution, bare metal, VMs, etc.
 
@@ -125,19 +125,19 @@ git clone https://github.com/TheJaySmith/serverless-eventing
 cd serverless-eventing
 ```
 
-I have created a script called `setup-cloudrun.sh` that simplifies the staging process. It will attempt to install [Google Cloud SDK](https://cloud.google.com/sdk/) if you don’t have it installed already. If it can execute `gcloud`, it skips this step. It will then do the following.
+I have created a script called `setup-gke.sh` that simplifies the staging process. It will attempt to install [Google Cloud SDK](https://cloud.google.com/sdk/) if you don’t have it installed already. If it can execute `gcloud`, it skips this step. It will then do the following.
 
 - Enable Google Cloud APIs if they aren’t already enabled
-- Create a [GKE](https://cloud.google.com/kubernetes-engine) Cluster running [Cloud Run on Anthos](https://cloud.google.com/anthos/run)
-- Setup [xip.io domain](https://cloud.google.com/run/docs/gke/default-domain) for Cloud Run on Anthos
+- Create a [GKE](https://cloud.google.com/kubernetes-engine) Cluster
+- Setup [xip.io domain](https://cloud.google.com/run/docs/gke/default-domain) for GKE
 - Install [Knative Eventing](https://knative.dev/docs/eventing/) and [Knative Monitoring](https://knative.dev/docs/serving/installing-logging-metrics-traces/)
 - Give your compute service account access to Secret Manager
 
 Now let's navigate back to the `serverless-eventing` directory and run the script.
 
 ```bash
-chmod +x scripts/setup-cloudrun.sh
-sh scripts/setup-cloudrun.sh
+chmod +x scripts/setup-gke.sh
+sh scripts/setup-gke.sh
 ```
 
 ## Setup AlphaVantage

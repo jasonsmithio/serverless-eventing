@@ -23,7 +23,7 @@ First we will setup some basic environment variables. Be sure to replace `<your 
 ```bash
 export PROJECT_ID=<your project>
 export PROJ_NUMBER=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(PROJECT_NUMBER)")
-export CLUSTER_NAME='cr-knative-nats'
+export CLUSTER_NAME='gke-knative-nats'
 export ZONE='us-central1-a'
 export KO_DOCKER_REPO="gcr.io/${PROJECT_ID}"
 ```
@@ -35,19 +35,19 @@ git clone https://github.com/TheJaySmith/serverless-eventing
 cd serverless-eventing
 ```
 
-I have created a script called `setup-cloudrun.sh` that simplifies the staging process. It will attempt to install [Google Cloud SDK](https://cloud.google.com/sdk/) if you don’t have it installed already. If it can execute `gcloud`, it skips this step. It will then do the following.
+I have created a script called `setup-gke.sh` that simplifies the staging process. It will attempt to install [Google Cloud SDK](https://cloud.google.com/sdk/) if you don’t have it installed already. If it can execute `gcloud`, it skips this step. It will then do the following.
 
 - Enable Google Cloud APIs if they aren’t already enabled
-- Create a [GKE](https://cloud.google.com/kubernetes-engine) Cluster running [Cloud Run on Anthos](https://cloud.google.com/anthos/run)
-- Setup [xip.io domain](https://cloud.google.com/run/docs/gke/default-domain) for Cloud Run on Anthos
+- Create a [GKE](https://cloud.google.com/kubernetes-engine) Cluster
+- Setup [xip.io domain](https://cloud.google.com/run/docs/gke/default-domain) for GKE
 - Install [Knative Eventing](https://knative.dev/docs/eventing/) and [Knative Monitoring](https://knative.dev/docs/serving/installing-logging-metrics-traces/)
 - Give your compute service account access to Secret Manager
 
 Now let's navigate back to the `serverless-eventing` directory and run the script.
 
 ```bash
-chmod +x scripts/setup-cloudrun.sh
-sh scripts/setup-cloudrun.sh
+chmod +x scripts/setup-gke.sh
+sh scripts/setup-gke.sh
 ```
 
 Alright, we are ready to get started.

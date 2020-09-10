@@ -84,16 +84,17 @@ echo "******Now we shall create your cluster******"
 gcloud beta container clusters create $CLUSTER_NAME \
     --addons=HttpLoadBalancing,CloudRun  \
 	--zone=$ZONE \
-    --cluster-version=latest \
+    --cluster-version=1.16.13-gke.1 \
     --enable-stackdriver-kubernetes \
     --enable-ip-alias \
     --enable-autoscaling --min-nodes=1 --max-nodes=10 \
     --enable-autorepair \
 	--machine-type=n1-standard-4 \
     --num-nodes=3 \
-	--scopes=cloud-platform 
+	--scopes=cloud-platform \
+    --release-channel regular
 
-#	--cluster-version=1.15.7-gke.2 \
+#	--cluster-version=1.15.12-gke.9 \ \
 #   --addons=Istio,HttpLoadBalancing,CloudRun  \
 #   --istio-config=auth=MTLS_PERMISSIVE \
 

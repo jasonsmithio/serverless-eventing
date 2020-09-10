@@ -16,3 +16,5 @@ natss-currency-use.yaml
 
 staging/
 staging/eventing-contrib
+
+demo-stuff.sh
