@@ -123,13 +123,13 @@ rm -rf istio-${ISTIO_VERSION}
 #rm ${ISTIO_TARBALL}
 
 ##This installs Istio Development
-#https://github.com/knative-sandbox/net-istio/blob/master/third_party/istio-1.5.7/istio-minimal.yaml
+# https://raw.githubusercontent.com/knative-sandbox/net-istio/master/third_party/istio-1.5.7/istio-minimal.yaml
 
 # This is no mesh
-https://github.com/knative-sandbox/net-istio/blob/master/third_party/istio-1.5.7/istio-ci-no-mesh.yaml
+# https://raw.githubusercontent.com/knative-sandbox/net-istio/master/third_party/istio-1.5.7/istio-ci-no-mesh.yaml
 
-# This is mesh
-#40https://github.com/knative-sandbox/net-istio/blob/master/third_party/istio-1.5.7/istio-ci-mesh.yaml
+## This is mesh
+# https://raw.githubusercontent.com/knative-sandbox/net-istio/master/third_party/istio-1.5.7/istio-ci-mesh.yaml
 
 ## Installing Istio Knative Components
 echo "Installing Istio Knative Components"
