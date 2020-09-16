@@ -1,0 +1,11 @@
+apiVersion: events.cloud.google.com/v1
+kind: CloudPubSubSource
+metadata:
+  name: pubsub-knative-source
+spec:
+  topic: currency-pubsub
+  sink:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: pubsub-viewer

@@ -91,6 +91,33 @@ One last thing, we need to install the PubSub Channel component for Knative Even
 kubectl apply --filename https://github.com/google/knative-gcp/releases/download/v0.17.0/cloud-run-events.yaml
 ```
 
+## PubSub Data Plane
+
+For our application to authenticate with PubSub, we need to create a [Service Account](https://cloud.google.com/kubernetes-engine/docs/tutorials/authenticating-to-cloud-platform "Service Account"). We obviously don't want just any application writing or consuming our data. 
+
+First we'll create a service account called `knative-dataplane`
+
+```bash
+gcloud iam service-accounts create knative-dataplane
+```
+
+Next, we'll give the Service Account the proper permissions to access PubSub and as Editor. 
+
+```bash
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:knative-dataplane@$PROJECT_ID.iam.gserviceaccount.com \
+  --role roles/pubsub.editor
+```
+
+Finally, create a service account key, turn it into a Kubernetes secret, then delete the json file (for security reasons)
+
+```bash
+gcloud iam service-accounts keys create knative-dataplane.json \
+--iam-account=knativedataplane@$PROJECT_ID.iam.gserviceaccount.com
+kubectl --namespace default create secret generic google-cloud-key --from-file=key.json=knative-dataplane.json
+rm knative-dataplane.json
+```
+
 ## Building our Applications
 
 Let's now build our application. First, let's make sure that `gcloud` will be properly authenitcated with the `docker` command. If you do not have Docker installed, you can find it [here](https://docs.docker.com/get-docker/ "here").
@@ -222,31 +249,28 @@ All of our services are deployed so let's move on.
 
 ## Subscribe and Test
 
-Let's subscribe and consume. First let's create a [Subscription](https://knative.dev/docs/reference/eventing/#messaging.knative.dev/v1beta1.Subscription). Take a look at `pubsub-subscription.yaml`.
+Let's subscribe and consume. First let's create an [Event Source](https://knative.dev/docs/eventing/sources/ "Event Source"). Take a look at `pubsub-source.yaml`.
 
 ```bash
-apiVersion: messaging.knative.dev/v1
-kind: Subscription
+apiVersion: events.cloud.google.com/v1
+kind: CloudPubSubSource
 metadata:
-  name: pubsub-currency
+  name: pubsub-knative-source
 spec:
-  channel:
-    apiVersion: messaging.cloud.google.com/v1beta1
-    kind: Channel
-    name: currency-pubsub
-  subscriber:
+  topic: currency-pubsub
+  sink:
     ref:
-      apiVersion: serving.knative.dev/v1
+      apiVersion: v1
       kind: Service
       name: pubsub-viewer
 ```
 
-We are creating a subscription service called `pubsub-subscription` and it will subscribe to the PubSub topic named `currency-pubsub`. It will then send that data to be consumed by our Service named `pubsub-viewer`.
+We are creating an Event Source  called `pubsub-knative-source` and it will subscribe to the PubSub topic named `currency-pubsub`. It will then send that data to be consumed by our Service named `pubsub-viewer`.
 
 Let's apply this.
 
 ```bash
-kubectl apply -f pubsub-subscription.yaml
+kubectl apply -f pubsub-source.yaml
 ```
 
 Finally, we will deploy a service to read the events. In a real world application, this may be your service that processes the data in order to get an output. For our purposes, it'll just log the results. So let's go ahead and apply.
@@ -264,16 +288,34 @@ kubectl logs -l serving.knative.dev/service=pubsub-viewer -c user-container --si
 If all works, you should see something like this.
 
 ```bash
+☁️  cloudevents.Event
+Validation: valid
 Context Attributes,
   specversion: 1.0
-  type: dev.knative.messaging.natsschannel
-  source: /apis/messaging.knative.dev/v1alpha1/namespaces/default/natsschannels/foo
-  id:
+  type: google.cloud.pubsub.topic.v1.messagePublished
+  source: //pubsub.googleapis.com/projects/rikudog/topics/currency-pubsub
+  id: 1533730805360920
+  time: 2020-09-16T01:43:28.536Z
+  datacontenttype: application/json
 Data,
-  "\"106.55000000\""
+  {
+    "subscription": "cre-src_default_pubsub-knative-source_8da47c4c-7e5b-45fe-a1fb-b4becda83ba1",
+    "message": {
+      "messageId": "1533730805360920",
+      "data": "IjEwNS4zMDAwMDAwMCI=",
+      "publishTime": "2020-09-16T01:43:28.536Z"
+    }
+  }
 ```
 
-Congrats! Your service is now consuming data in real time from the NATS Streaming Server!
+This is base64 encoded so we'll need to decode it. Fortunately, we can do this from the terminal.
+
+```bash
+$ echo IjEwNS4zMDAwMDAwMCI= | base64 --decode
+"105.30000000"
+```
+
+Congrats! Your service is now consuming data in real time from PubSub!
 
 ## Summarize
 

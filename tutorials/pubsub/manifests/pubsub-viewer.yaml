@@ -1,11 +1,30 @@
-apiVersion: serving.knative.dev/v1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pubsub-viewer
+spec:
+  selector:
+    matchLabels:
+      app: pubsub-viewer
+  template:
+    metadata:
+      labels:
+        app: pubsub-viewer
+    spec:
+      containers:
+      - name: user-container
+        image: gcr.io/knative-releases/knative.dev/eventing-contrib/cmd/event_display@sha256:070f31589d919779a83adf3cc0f0b0e3f5f063eb57a67d53e5e8d0c5eefb57ba
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: pubsub-viewer
 spec:
-  template:
-    spec:
-      containers:
-      -  # This corresponds to
-         # https://github.com/knative/eventing-contrib/tree/master/cmd/event_display
-         image: gcr.io/knative-releases/knative.dev/eventing-contrib/cmd/event_display@sha256:070f31589d919779a83adf3cc0f0b0e3f5f063eb57a67d53e5e8d0c5eefb57ba
+  selector:
+    app: pubsub-viewer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080

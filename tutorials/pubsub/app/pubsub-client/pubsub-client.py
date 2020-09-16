@@ -37,6 +37,7 @@ def default_route():
     if request.method == 'POST':
         content = request.data.decode('utf-8')
         info(f'Event Display received event: {content}')
+        content = bytes(content, 'utf-8')
         future = publisher.publish(topic_path, data=content)
 
 
