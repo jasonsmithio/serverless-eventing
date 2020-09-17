@@ -2,15 +2,15 @@
 
 __Corresponding [Blog Post](https://thejaysmith.com/titles/serverlessjay/serverless-eventing/serverless-eventing-google-native-with-pubsub/ "Blog Post")__
 
-[Knative Eventing](https://knative.dev/docs/eventing/) offers a variety of EventSources to use for building a serverless eventing platform. So far, my blog has covered [SinkBinding](https://thejaysmith.com/titles/blogroll/serverless-eventing-sinkbinding-101/) as well as [Kafka](https://thejaysmith.com/titles/serverlessjay/serverless-eventing-modernizing-legacy-streaming-with-kafka/ "Kafka")and [NATS](https://thejaysmith.com/titles/serverlessjay/severless-eventing/serverless-eventing-cloud-native-messaging-with-nats-streaming-server/ "NATS") .
+[Knative Eventing](https://knative.dev/docs/eventing/) offers a variety of Event Sources to use when you are building a serverless eventing platform. So far, my blog has covered [SinkBinding](https://thejaysmith.com/titles/blogroll/serverless-eventing-sinkbinding-101/) as well as [Kafka](https://thejaysmith.com/titles/serverlessjay/serverless-eventing-modernizing-legacy-streaming-with-kafka/ "Kafka")and [NATS](https://thejaysmith.com/titles/serverlessjay/severless-eventing/serverless-eventing-cloud-native-messaging-with-nats-streaming-server/ "NATS") .
 
-This tutorial will show you how to use [NATS](https://nats.io/) as a Knative Eventing source. NATS is a relatively new offering compared to other messaging busses such as [RabbitMQ](https://rabbitmq.com "RabbitMQ") or [Apache Kafka](https://kafka.apache.org "Apache Kafka") but it was designed for the purpose of supporting messaging in a Cloud Native environment. It is even a [CNCF](https://cncf.io "CNCF") Incubating Project.
+This tutorial will show you how to use [Google Cloud PubSub](https://cloud.google.com/pubsub "Google Cloud PubSub") as a Knative Eventing source. PubSub is Google Cloud's messaging system. It is truly serverless because you do not have to provision any brokers or workers. You simply create topics and consume. It is also global so you don't have to worry about provisioning in certain regions or load balancing. It is a great solution for someone looking to go truly serverless in their Serverless Eventing strategy.
 
 ## Concepts
 
-We will continue to dive into the concept of the [Eventing Channel](https://knative.dev/docs/eventing/channels/default-channels/, "Eventing Channel"). As a refresher, Channels are [Kubernetes Custom Resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/ "Kubernetes Custom Resources") which define a single event forwarding and persistence layer. Messaging implementations may provide implementations of Channels via a Kubernetes Custom Resource, supporting different technologies, such as Apache Kafka or NATS Streaming. A simpler way to think of it is as a delivery mechanism that can fan-out messages to multiple destinations (sinks).
+Google provides us with an [Event Source](https://knative.dev/docs/eventing/sources/ "Event Source") called [CloudPubSubSource](https://github.com/google/knative-gcp/blob/master/docs/examples/cloudpubsubsource/README.md "CloudPubSubSource"). Event Sources are [Kubernetes Custom Resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/ "Kubernetes Custom Resources") that acts as a link between an event producer and the event sink. There are many types of event sources, some maintined by the Knative team and some maintained by third parties. You can even [create your own](https://knative.dev/docs/eventing/samples/writing-event-source/ "create your own")!
 
-We will be using the [Google Cloud PubSub](https://cloud.google.com/pubsub "NGoogle Cloud PubSub") for our channel. You will notice that we are using a different API than what we have used previously. For PubSub, Google created their own API that is KNative Eventing API compliant but also integrates some of Google Cloud's SDK, making integration with Google Cloud services as event sources easier. This API is `messaging.cloud.google.com/v1beta1` rather than `sources.knative.dev/v1alpha2` or `messaging.knative.dev/v1alpha1`.
+Google PubSub will be our Event Source. You will notice that we are using a different API than what we have used previously. For PubSub, Google created their own API that is KNative Eventing API compliant but also integrates some of Google Cloud's SDK, making integration with Google Cloud services as event sources easier. This API is `messaging.cloud.google.com/v1beta1` rather than `sources.knative.dev/v1beta1` or `messaging.knative.dev/v1alpha1`.
 
 ## Scenario
 
@@ -64,7 +64,7 @@ Some people have asked why I always recommend AlphaVantage when I do these demos
 
 ### Cloud Secret Manager
 
-Google Cloud recently GA’d [Cloud Secret Manager](https://cloud.google.com/secret-manager/) which gives you the ability to securely store your secrets encrypted in Google Cloud. Remember those four Twitter API keys we had earlier? We are going to store them in Google Cloud using the Secret Manager.
+Google Cloud offers a [Cloud Secret Manager](https://cloud.google.com/secret-manager/) which gives you the ability to securely store your secrets encrypted in Google Cloud. Remember those four Twitter API keys we had earlier? We are going to store them in Google Cloud using the Secret Manager.
 
 We will go from the Hamburger -> Security -> Secrets.
 
@@ -74,18 +74,18 @@ Let’s now Create a secret. We will name this secret `alpha-vantage-key` and gi
 
 ## Setting up PubSub
 
-One of the benefits of [PubSub](https://cloud.google.com/pubsub "PubSub") is that it is truly serverless. As the end user, you don't have to worry about provisioning brokers. You also pay for usage rather than paying for idle brokers. All of the infrastructure is abstracted and I can create a topic by doing this.
+As mentioned earlier, one of the benefits of [PubSub](https://cloud.google.com/pubsub "PubSub") is that it is truly serverless. As the end user, you don't have to worry about provisioning brokers. You also pay for usage rather than paying for idle brokers. All of the infrastructure is abstracted so I can provision the service and create a topic simply by entering the following:
 
 ```bash
 gcloud services enable pubsub.googleapis.com
 gcloud pubsub topics create currency-pubsub
 ```
 
-There is no need to provision a broker or install an operator on cluster. Of course, the con here is that it's proprietary and currently not something that you can run on your own machine. Now if you are adopting a pure serverless model, it's fine. However, there are those people who do want the ability to control their technology, run it on premises, or avoid vendor lock-in by adopting open source software.
+As you can see, there was no need to provision a broker or install an operator on cluster. Of course, the con here is that it's proprietary and currently not something that you can run in your own datacenter. Now if you are adopting a pure serverless model, it's fine. However, there are those people who do want the ability to control their technology, run it on premises, or avoid vendor lock-in by adopting open source software.
 
 This is why we show a bunch of methods for using serverless eventing rather than push one product or another. It's best to find a tool that suits your project needs and developer culture.
 
-One last thing, we need to install the PubSub Channel component for Knative Eventing.
+One last thing, we need to install the PubSub component for Knative Eventing.
 
 ```bash
 kubectl apply --filename https://github.com/google/knative-gcp/releases/download/v0.17.0/cloud-run-events.yaml
@@ -93,7 +93,7 @@ kubectl apply --filename https://github.com/google/knative-gcp/releases/download
 
 ## PubSub Data Plane
 
-For our application to authenticate with PubSub, we need to create a [Service Account](https://cloud.google.com/kubernetes-engine/docs/tutorials/authenticating-to-cloud-platform "Service Account"). We obviously don't want just any application writing or consuming our data. 
+For our application to authenticate with PubSub, we need to create a [Service Account](https://cloud.google.com/kubernetes-engine/docs/tutorials/authenticating-to-cloud-platform "Service Account"). We obviously don't want just any application writing or consuming our data.
 
 First we'll create a service account called `knative-dataplane`
 
@@ -101,7 +101,7 @@ First we'll create a service account called `knative-dataplane`
 gcloud iam service-accounts create knative-dataplane
 ```
 
-Next, we'll give the Service Account the proper permissions to access PubSub and as Editor. 
+Next, we'll give the Service Account the proper permissions to access PubSub and as an Editor.
 
 ```bash
 gcloud projects add-iam-policy-binding $PROJECT_ID \
@@ -196,6 +196,7 @@ def default_route():
     if request.method == 'POST':
         content = request.data.decode('utf-8')
         info(f'Event Display received event: {content}')
+        content = bytes(content, 'utf-8')
         future = publisher.publish(topic_path, data=content)
 
 
@@ -323,4 +324,20 @@ In this demo, we used the Google Cloud PubSub to create a Knative Channel and su
 
 ## End
 
+Let's cleanup our work. First, let's delete our PubSub Topic.
+
+```bash
+gcloud pubsub topics delete currency-pubsub
+```
+
+Next let's delete our Service Account.
+
+```bash
+gcloud iam service-accounts delete knative-dataplane
+```
+
 Be sure to delete your clusters!
+
+```bash
+gcloud beta container clusters create $CLUSTER_NAME --zone $ZONE
+```
