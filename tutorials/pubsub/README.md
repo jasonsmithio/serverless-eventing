@@ -320,7 +320,7 @@ Congrats! Your service is now consuming data in real time from PubSub!
 
 ## Summarize
 
-In this demo, we used the Google Cloud PubSub to create a Knative Channel and subscribe a consumer service ttot use the streaming data. The true serverless nature of PubSub makes it a great platform for Eventing Busses. While this only showed one service accepting data, you would be able to scale that by using multiple subscriptions, brokers, and/or triggers. In the future, I will show how to create PubSub as an Event Source.
+In this demo, we used the Google Cloud PubSub to create a Knative Event Source and subscribe a consumer service ttot use the streaming data. The true serverless nature of PubSub makes it a great platform for Eventing Busses. While this only showed one service accepting data, you would be able to scale that by using multiple subscriptions, brokers, and/or triggers. In the future, I will show how to create PubSub as an Event Source.
 
 ## End
 
