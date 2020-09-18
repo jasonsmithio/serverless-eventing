@@ -136,8 +136,8 @@ kubectl apply --filename https://github.com/knative/serving/releases/download/v$
 
 
 ## Istio install per https://github.com/knative/serving/blob/master/DEVELOPMENT.md#deploy-istio
-export ISTIO_STABLE_VERSION=$(curl https://raw.githubusercontent.com/knative-sandbox/net-istio/master/third_party/istio-stable)
-kubectl apply -f "https://raw.githubusercontent.com/knative-sandbox/net-istio/master/third_party/${ISTIO_STABLE_VERSION}/istio-knative-extras.yaml"
+#export ISTIO_STABLE_VERSION=$(curl https://raw.githubusercontent.com/knative-sandbox/net-istio/master/third_party/istio-stable)
+kubectl apply -f "https://raw.githubusercontent.com/knative-sandbox/net-istio/master/third_party/istio-stable/istio-knative-extras.yaml"
 
 
 ## Installing Istio Knative Components
