@@ -65,4 +65,4 @@ controlcenter:
       url: http://connectors:8083
     schemaRegistry:
       enabled: true
-      url: http://schemaregistry:8081 
+      url: http://schemaregistry:8081

@@ -110,7 +110,7 @@ export KAFKA_IP=$(kubectl get service kafka-bootstrap-lb -n operator -o=jsonpath
 and then we reapply the Helm chart with the added IP address. **PLEASE NOTE** this assumes that you are executing in the `gke` directory.
 
 ```bash
-helm upgrade --namespace operator --set global.initContainer.image.tag=5.5.0.0 --set global.provider.region=us-central1 --set global.provider.kubernetes.deployment.zones={us-central1-a}  --set kafka.image.tag=5.5.0.0 --set kafka.replicas=1 --set kafka.enabled=true  --set kafka.loadBalancer.enabled=true --set kafka.loadBalancer.domain=${KAFKA_IP}.xip.io -f cfg/values.yaml kafka ../common/cp/operator/5.5.0/helm/confluent-operator
+helm upgrade --install --namespace operator --wait --timeout=5m -f /Users/jaysmith/.kafka/examples/kubernetes/gke-base/cfg/values.yaml --set global.initContainer.image.tag=6.0.0.0 --set global.provider.region=us-central1 --set global.provider.kubernetes.deployment.zones={us-central1-a}  --set kafka.image.tag=6.0.0.0 --set kafka.replicas=1 --set kafka.enabled=true kafka --set kafka.loadBalancer.enabled=true --set kafka.loadBalancer.domain=${KAFKA_IP}.xip.io -f cfg/values.yaml ../common/cp/operator/1.6.0/helm/confluent-operator
 ```
 
 ## Install Knative on a GKE Cluster
