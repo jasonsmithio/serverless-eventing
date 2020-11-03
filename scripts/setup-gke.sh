@@ -111,9 +111,8 @@ gcloud beta container clusters create $CLUSTER_NAME \
     --enable-autoscaling --min-nodes=1 --max-nodes=10 \
     --enable-autorepair \
 	--machine-type=n1-standard-2 \
-	--scopes=cloud-platform 
-
-#	--cluster-version=1.15.7-gke.2 \
+	--scopes=cloud-platform \
+    --release-channel=regular
 
 #wait for 90 seconds
 echo "***** Waiting for 90 second for cluster to complete *****"

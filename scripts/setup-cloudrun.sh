@@ -10,7 +10,7 @@ clear
 if ! [ -x "$(command -v gcloud)" ]; then
     echo "***** Installing Google Cloud SDK *****"
     if [[ "$OSTYPE"  == "linux-gnu" ]]; then
-        curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-266.0.0-linux-x86_64.tar.gz -o google-cloud-sdk-266.0.0-linux-x86_64.tar.gz
+        curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-317.0.0-linux-x86_64.tar.gz -o google-cloud-sdk-317.0.0-linux-x86_64.tar.gz
         tar xf google-cloud-sdk-266.0.0-linux-x86_64.tar.gz && ./google-cloud-sdk/install.sh
         echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.profile
         #source ~/.profile
@@ -18,7 +18,7 @@ if ! [ -x "$(command -v gcloud)" ]; then
         gcloud auth login
 
     elif [[ "$OSTYPE" == "darwin"* ]]; then
-        curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-266.0.0-darwin-x86_64.tar.gz -o google-cloud-sdk-266.0.0-darwin-x86_64.tar.gz
+        curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-317.0.0-darwin-x86_64.tar.gz -o google-cloud-sdk-317.0.0-darwin-x86_64.tar.gz
         tar xf google-cloud-sdk-266.0.0-darwin-x86_64.tar.gz && ./google-cloud-sdk/install.sh
         echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bash_profile
         #source ~/.bash_profile
@@ -84,7 +84,6 @@ echo "******Now we shall create your cluster******"
 gcloud beta container clusters create $CLUSTER_NAME \
     --addons=HttpLoadBalancing,CloudRun  \
 	--zone=$ZONE \
-    --cluster-version=1.16.13-gke.1 \
     --enable-stackdriver-kubernetes \
     --enable-ip-alias \
     --enable-autoscaling --min-nodes=1 --max-nodes=10 \
@@ -92,7 +91,7 @@ gcloud beta container clusters create $CLUSTER_NAME \
 	--machine-type=n1-standard-4 \
     --num-nodes=3 \
 	--scopes=cloud-platform \
-    --release-channel regular
+    --release-channel=regular
 
 #	--cluster-version=1.15.12-gke.9 \ \
 #   --addons=Istio,HttpLoadBalancing,CloudRun  \
@@ -144,12 +143,12 @@ kubectl patch configmap config-domain --namespace knative-serving --patch \
 
 
 echo "Install Knative Eventing"
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-crds.yaml
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.18.0/eventing-crds.yaml
 
 echo "***** Waiting for 45 seconds for Knative Eventing CRDs to Install  *****"
 sleep 45
 
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/eventing-core.yaml
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.18.0/eventing-core.yaml
 
 echo "***** Waiting for 30 seconds for Knative Eventing Core to Install  *****"
 sleep 30

@@ -23,7 +23,7 @@ Let's set some environment variables. Be sure to replace "your project" with you
 ```bash
 export PROJECT_ID=<your project>
 export PROJ_NUMBER=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(PROJECT_NUMBER)")
-export CLUSTER_NAME='cp-examples-operator-gcp'
+export CLUSTER_NAME='cr-knative'
 export ZONE='us-central1-a'
 ```
 
@@ -38,7 +38,7 @@ Install Helm version 3
 Now lets download our repo and install the [Confluent Operator](https://docs.confluent.io/current/tutorials/examples/kubernetes/gke-base/docs/index.html "Confluent Operator")
 
 ```bash
-git clone https://github.com/confluentinc/examples
+git clone --branch 6.0.0-post https://github.com/confluentinc/examples
 cd examples/kubernetes/gke-base
 ```
 
@@ -136,8 +136,8 @@ I have created a script called `setup-gke.sh` that simplifies the staging proces
 Now let's navigate back to the `serverless-eventing` directory and run the script.
 
 ```bash
-chmod +x scripts/setup-gke.sh
-sh scripts/setup-gke.sh
+chmod +x scripts/setup-cloudrun.sh
+sh scripts/setup-cloudrun.sh
 ```
 
 ## Setup AlphaVantage
