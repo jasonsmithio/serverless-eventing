@@ -56,7 +56,7 @@ fi
 
 if [ -z "$KVERSION" ]
 then
-    export KVERSION='0.17.0'
+    export KVERSION='0.18.0'
 fi
 
 if [ -z "$PROJECT_ID" ]
@@ -105,7 +105,6 @@ echo "******Now we shall create your cluster******"
 gcloud beta container clusters create $CLUSTER_NAME \
 --addons HorizontalPodAutoscaling,HttpLoadBalancing,Istio  \
 	--zone=$ZONE \
-    --cluster-version=latest \
     --enable-stackdriver-kubernetes \
     --enable-ip-alias \
     --enable-autoscaling --min-nodes=1 --max-nodes=10 \
@@ -170,3 +169,10 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$PROJ
 ## Install Tekton
 #echo "Installing Tekton"
 #kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+
+echo "Knative Serving Version"
+kubectl get namespace knative-serving -o 'go-template={{index .metadata.labels "serving.knative.dev/release"}}'
+
+echo "Knative Eventing Version"
+kubectl get namespace knative-eventing -o 'go-template={{index .metadata.labels "eventing.knative.dev/release"}}'
+

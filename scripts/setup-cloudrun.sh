@@ -138,25 +138,60 @@ echo "***** We will now patch configmap for domain ******"
 kubectl patch configmap config-domain --namespace knative-serving --patch \
 '{"data": {"example.com": null, "'"$EXTERNAL_IP"'.xip.io": ""}}'
 
-## Install Knative Eventing
+## Install Events for Cloud Run for Anthos
+echo " ****** Installing Events for Cloud Run for Anthos ****** "
+gcloud beta events init --platform gke --quiet
+
+echo " ****** Verifying Installation ****** "
+kubectl get pods -n cloud-run-events
+kubectl get pods -n knative-eventing
+
+
+echo " ****** Creating Event Broker ****** "
+kubectl create namespace events
+gcloud beta events namespaces init events \
+  --copy-default-secret
+gcloud beta events brokers create default \
+  --namespace events
+
+
+
+echo " ****** Installing Knative Eventing 0.18.0 ******"
+
+
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.18.0/eventing-crds.yaml
+kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.18.0/eventing-core.yaml
+
+
+#echo "Installing Knative 0.15.0"
+#kubectl apply  --selector knative.dev/crd-install=true \
+#--filename https://github.com/knative/eventing/releases/download/v0.15.0/eventing.yaml
+#kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.15.0/eventing.yaml
+
+#kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.15.0/mt-channel-broker.yaml
+
+
+##### DEPRECATED. Events at Cloud Run for Anthos
+
+##Install Knative Eventing
 ## https://knative.dev/docs/install/any-kubernetes-cluster/#installing-the-eventing-component
 
 
-echo "Install Knative Eventing"
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.18.0/eventing-crds.yaml
+#echo "Install Knative Eventing"
+#kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.18.0/eventing-crds.yaml
+#
+#echo "***** Waiting for 45 seconds for Knative Eventing CRDs to Install  *****"
+#sleep 45
 
-echo "***** Waiting for 45 seconds for Knative Eventing CRDs to Install  *****"
-sleep 45
+#kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.18.0/eventing-core.yaml
 
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.18.0/eventing-core.yaml
-
-echo "***** Waiting for 30 seconds for Knative Eventing Core to Install  *****"
-sleep 30
+#echo "***** Waiting for 30 seconds for Knative Eventing Core to Install  *****"
+#sleep 30
 
 #install Channels
 
-kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/mt-channel-broker.yam \
---filename https://github.com/knative/eventing/releases/download/v0.16.0/in-memory-channel.yaml
+#kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.16.0/mt-channel-broker.yam \
+#--filename https://github.com/knative/eventing/releases/download/v0.16.0/in-memory-channel.yaml
 
 
 
@@ -170,3 +205,10 @@ kubectl label namespace default knative-eventing-injection=enabled
 
 # Enable Secret Admin to compute service account
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$PROJ_NUMBER-compute@developer.gserviceaccount.com --role roles/secretmanager.admin
+
+echo "Knative Serving Version"
+kubectl get namespace knative-serving -o 'go-template={{index .metadata.labels "serving.knative.dev/release"}}'
+
+echo "Knative Eventing Version"
+kubectl get namespace knative-eventing -o 'go-template={{index .metadata.labels "eventing.knative.dev/release"}}'
+
