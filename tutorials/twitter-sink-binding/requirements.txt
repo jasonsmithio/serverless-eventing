@@ -3,7 +3,7 @@ pylint==2.4.0
 cloudevents==0.2.3
 google-cloud==0.34.0
 google-cloud-secret-manager==0.1.0
-Flask==1.1.1
+Flask==2.3.2
 gunicorn==19.9.0
 tweepy==3.8.0
 requests==2.23.0
