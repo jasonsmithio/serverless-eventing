@@ -1,6 +1,6 @@
 pylint==2.4.0
 google-cloud-secret-manager==1.0.0
-Flask==1.1.2
+Flask==2.2.5
 asyncio-nats-client==0.10.0
 asyncio-nats-streaming==0.4.0
 gunicorn==20.0.4
