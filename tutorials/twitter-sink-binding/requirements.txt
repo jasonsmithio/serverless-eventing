@@ -1,10 +1,10 @@
 kncloudevents==0.1.0
-pylint==2.4.0
-cloudevents==0.2.3
+pylint==3.0.3
+cloudevents==1.10.1
 google-cloud==0.34.0
-google-cloud-secret-manager==0.1.0
-Flask==1.1.1
-gunicorn==19.9.0
-tweepy==3.8.0
+google-cloud-secret-manager==2.18.1
+Flask==3.0.2
+gunicorn==21.2.0
+tweepy==4.14.0
 requests==2.31.0
 
