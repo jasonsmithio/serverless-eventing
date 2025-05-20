@@ -304,7 +304,7 @@ sed -i '' 's/PROJECT_ID/'${PROJECT_ID}'/g' natss-client.yaml
 sed -i '' 's/PROJECT_ID/'${PROJECT_ID}'/g' natss-currency.yaml
 ```
 
-First we will deploy a SinkBinding. Here you can see that we deploy the SinkBinding undo the name `natss-currency-sink-bind`. This will take the "subject" as the event source and the sink as the event sink. For these purposes we are using a Knative Service but [SinkBinding](https://knative.dev/docs/eventing/samples/sinkbinding/ "SinkBinding") does allow for you to use other Kubernetes objects such as datasets. I also have a demo [here](https://github.com/TheJaySmith/serverless-eventing/tree/master/tutorials/twitter-sink-binding, "here").
+First we will deploy a SinkBinding. Here you can see that we deploy the SinkBinding undo the name `natss-currency-sink-bind`. This will take the "subject" as the event source and the sink as the event sink. For these purposes we are using a Knative Service but [SinkBinding](https://knative.dev/docs/eventing/samples/sinkbinding/ "SinkBinding") does allow for you to use other Kubernetes objects such as datasets. I also have a demo [here](https://github.com/TheJaySmith/serverless-eventing/tree/master/tutorials/twitter-sink-binding).
 
 So let's up our binding.
 
