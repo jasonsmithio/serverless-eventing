@@ -1,8 +1,8 @@
-pylint==2.4.0
-google-cloud-secret-manager==1.0.0
-Flask==1.1.2
-nats-python==0.8.0
-gunicorn==20.0.4
-cloudevents==0.3.0
-requests==2.23.0
-alpha-vantage==2.2.0
+pylint==3.0.3
+google-cloud-secret-manager==2.18.0
+Flask==3.0.2
+nats-py==2.7.0
+gunicorn==23.0.0
+cloudevents==1.10.1
+requests>=2.32.0
+alpha-vantage==2.3.1
