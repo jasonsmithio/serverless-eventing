@@ -7,5 +7,5 @@ gunicorn>=23.0.0,<24.0.0
 nats-python==0.8.0
 nats-py>=2.10.0,<2.20.0
 cloudevents>=1.11.0,<1.20.0
-requests==2.32.2
+requests>=2.32.4,<2.35.0
 alpha-vantage>=3.0.0,<3.3.0
